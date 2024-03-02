@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class OccasionService
+public class OccasionService : IOccasionService
 {
     private readonly AppDbContext _context;
 

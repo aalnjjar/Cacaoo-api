@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class ChefService
+public class ChefService : IChefService
 {
     private readonly AppDbContext _context;
 
@@ -136,11 +136,13 @@ public class ChefService
 
             var query = (from c in _context.sm_chef_products
                 from o in _context.sm_products
+                join res in _context.sm_restaurants on o.Restaurant_Id equals res.Restaurant_Id
                 join b in _context.sm_brands on o.Brand_Id equals b.Brand_Id into brand
                 from b in brand.DefaultIfEmpty()
                 where o.Show && o.Publish && o.Product_Id == c.Product_Id && c.Chef_Id == chef_id
                 orderby o.Sequence
-                select new { b, o }).ToList();
+                select new { b, o , res})
+                .ToList();
 
 
             var total = query.Count;
@@ -151,6 +153,8 @@ public class ChefService
                 var prodDM = product.o;
                 prodDM.Brand_Name_E = product.b != null ? product.b.Brand_Name_E : "";
                 prodDM.Brand_Name_A = product.b != null ? product.b.Brand_Name_A : "";
+                prodDM.DeliveryTime = product.res.Delivery_Time;
+                prodDM.PreparationTime = product.o.PreparationTime;
                 appPosts.Items.Add(prodDM);
             }
 

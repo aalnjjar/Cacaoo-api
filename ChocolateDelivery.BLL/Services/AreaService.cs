@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class AreaService
+public class AreaService : IAreaService
 {
     private readonly AppDbContext _context;
 

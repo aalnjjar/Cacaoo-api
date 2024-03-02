@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class RedeemPointService
+public class RedeemPointService : IRedeemPointService
 {
     private readonly AppDbContext _context;
 

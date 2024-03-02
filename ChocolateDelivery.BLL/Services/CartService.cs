@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class CartService
+public class CartService : ICartService
 {
     private readonly AppDbContext _context;
 

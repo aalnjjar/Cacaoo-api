@@ -367,6 +367,9 @@ public class ProductDTO
     public bool Is_Exclusive { get; set; }
     public bool Is_Catering { get; set; }
     public long? Brand_id { get; set; }
+    public string DeliveryTime { get; set; } = string.Empty;
+    public int PreparationTime { get; set; }
+    public string PreparationTimeStr => PreparationTime > 0 ?  $"{PreparationTime} mins" : string.Empty;
 }
 
 public class BrandsResponse

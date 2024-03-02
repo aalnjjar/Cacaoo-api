@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class RestaurantService
+public class RestaurantService : IRestaurantService
 {
     private readonly AppDbContext _context;
 

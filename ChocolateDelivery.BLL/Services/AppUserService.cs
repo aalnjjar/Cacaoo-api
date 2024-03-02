@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class AppUserService
+public class AppUserService : IAppUserService
 {
     private readonly AppDbContext _context;
 

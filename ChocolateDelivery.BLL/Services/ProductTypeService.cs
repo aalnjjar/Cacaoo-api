@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class ProductTypeService
+public class ProductTypeService : IProductTypeService
 {
     private readonly AppDbContext _context;
 

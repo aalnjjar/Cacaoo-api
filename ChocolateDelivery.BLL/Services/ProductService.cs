@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class ProductService
+public class ProductService : IProductService
 {
     private readonly AppDbContext _context;
 
@@ -92,15 +92,17 @@ public class ProductService
 
 
             var query = (from o in _context.sm_products
+                join res in _context.sm_restaurants on o.Restaurant_Id equals res.Restaurant_Id 
                 from sc in _context.sm_sub_categories
                 from c in _context.sm_categories
                 join f in _context.txn_favorite on o.Product_Id equals f.Product_Id into favorite
                 from f in favorite.Where(x => x.App_User_Id == app_user_id).DefaultIfEmpty()
                 where o.Product_Id == product_id && o.Sub_Category_Id == sc.Sub_Category_Id && sc.Category_Id == c.Category_Id
-                select new { o, sc, f, c }).FirstOrDefault();
+                select new { o, sc, f, c , res}).FirstOrDefault();
 
             if (query != null)
             {
+                query.o.DeliveryTime = query.res.Delivery_Time;
                 area = query.o;
                 area.Category_Id = query.sc.Category_Id;
                 area.Is_Gift_Product = query.c.Is_Gift;
@@ -129,12 +131,13 @@ public class ProductService
         {
             StaticMethods.GetKuwaitTime();
             var query = (from o in _context.sm_products
+                join res in _context.sm_restaurants on o.Restaurant_Id equals res.Restaurant_Id
                 join b in _context.sm_brands on o.Brand_Id equals b.Brand_Id into brand
                 from b in brand.DefaultIfEmpty()
                 where o.Show && o.Publish
                              && !o.Is_Catering_Menu_Product
                 orderby o.Sequence
-                select new { b, o }).ToList();
+                select new { b, o , res}).ToList();
 
             if (itemRequest.Sub_Category_Id != 0)
             {
@@ -182,6 +185,7 @@ public class ProductService
                 var prodDM = product.o;
                 prodDM.Brand_Name_E = product.b != null ? product.b.Brand_Name_E : "";
                 prodDM.Brand_Name_A = product.b != null ? product.b.Brand_Name_A : "";
+                prodDM.DeliveryTime = product.res.Delivery_Time;
                 appPosts.Items.Add(prodDM);
             }
 

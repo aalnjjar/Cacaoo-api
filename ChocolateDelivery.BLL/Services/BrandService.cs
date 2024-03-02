@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class BrandService
+public class BrandService : IBrandService
 {
     private readonly AppDbContext _context;
 
@@ -165,15 +165,23 @@ public class BrandService
         var productList = new List<SM_Products>();
         try
         {
+            var query = (from o in _context.sm_restaurants
+                    from p in _context.sm_products
+                    from s in _context.sm_sub_categories
+                    where o.Restaurant_Id == brand_id && o.Restaurant_Id == p.Restaurant_Id
+                                                      && p.Sub_Category_Id == s.Sub_Category_Id
+                                                      && p.Sub_Category_Id == cat_id
+                    select new {p, o})
+                .Distinct()
+                .ToList();
+            
+            foreach (var item in query)
+            {
+                var prod = item.p;
+                prod.DeliveryTime = item.o.Delivery_Time;
+            }
 
-            productList = (from o in _context.sm_restaurants
-                from p in _context.sm_products
-                from s in _context.sm_sub_categories
-                where o.Restaurant_Id == brand_id && o.Restaurant_Id == p.Restaurant_Id
-                                                  && p.Sub_Category_Id == s.Sub_Category_Id
-                                                  && p.Sub_Category_Id == cat_id
-                select p).Distinct().ToList();
-
+            productList = query.Select(s => s.p).ToList();
 
         }
         catch (Exception ex)

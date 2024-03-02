@@ -3,7 +3,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class OrderService
+public class OrderService : IOrderService
 {
 	private readonly AppDbContext _context;
 

@@ -3,7 +3,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class SettingService
+public class SettingService : ISettingService
 {
     private readonly AppDbContext _context;
     private string _logPath;

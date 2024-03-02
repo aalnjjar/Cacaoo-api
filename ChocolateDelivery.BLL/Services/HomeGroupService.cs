@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class HomeGroupService
+public class HomeGroupService : IHomeGroupService
 {
     private readonly AppDbContext _context;
 

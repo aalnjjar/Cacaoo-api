@@ -3,7 +3,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class CarouselService
+public class CarouselService : ICarouselService
 {
     private readonly AppDbContext _context;
 

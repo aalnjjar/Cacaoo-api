@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class DeviceService
+public class DeviceService : IDeviceService
 {
     private readonly AppDbContext _context;
 
