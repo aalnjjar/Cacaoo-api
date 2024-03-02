@@ -223,8 +223,9 @@ public class UnreadAppointmentResponse
     public int Unread_Count { get; set; }
     public List<TXN_APPOINTMENTS> Appointments { get; set; } = new();
 }
-    
-public class TXN_APPOINTMENTS {
+
+public class TXN_APPOINTMENTS
+{
     [NotMapped]
     public string Cust_Name { get; set; } = "";
     [NotMapped]
@@ -233,7 +234,7 @@ public class TXN_APPOINTMENTS {
     public string Appointment_Time { get; set; } = "";
 
 }
-    
+
 public class MeasurementResponse
 {
     public int Status { get; set; }
@@ -366,10 +367,11 @@ public class ProductDTO
     public decimal Price { get; set; }
     public bool Is_Exclusive { get; set; }
     public bool Is_Catering { get; set; }
+    public bool IsCustomizable { get; set; }
     public long? Brand_id { get; set; }
     public string DeliveryTime { get; set; } = string.Empty;
     public int PreparationTime { get; set; }
-    public string PreparationTimeStr => PreparationTime > 0 ?  $"{PreparationTime} mins" : string.Empty;
+    public string PreparationTimeStr => PreparationTime > 0 ? $"{PreparationTime} mins" : string.Empty;
 }
 
 public class BrandsResponse
@@ -424,7 +426,7 @@ public class BrandCategoryDTO
 }
 public class RegisterRequest
 {
-    public string Name { get; set; } = string.Empty;  
+    public string Name { get; set; } = string.Empty;
     public string Mobile { get; set; } = string.Empty;
     public string Image_Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -457,20 +459,21 @@ public class GeneralResponse
 }
 public class CartRequest
 {
-    public long Cart_Id { get; set; }      
+    public long Cart_Id { get; set; }
     public string App_User_Id { get; set; } = string.Empty;
     public long Product_Id { get; set; }
     public int Qty { get; set; }
     public string? Comments { get; set; } = string.Empty;
     public List<long> Product_AddOnIds { get; set; }
     public List<CartCateringProductsDTO> Catering_Products { get; set; }
-    public CartRequest() {
+    public CartRequest()
+    {
         Product_AddOnIds = new List<long>();
         Catering_Products = new List<CartCateringProductsDTO>();
     }
 
 }
-   
+
 public class AddCartResponse
 {
     public int Status { get; set; }
@@ -483,8 +486,8 @@ public class ProfileResponse
     public int Status { get; set; }
     public string Message { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string Mobile { get; set; } = string.Empty;    
-    public string Email { get; set; } = string.Empty;      
+    public string Mobile { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public short Login_Type { get; set; }
     public decimal Redeem_Points { get; set; }
     public string Plate_Num { get; set; } = string.Empty;
@@ -495,7 +498,7 @@ public class UpdatePofileRequest
     public string App_User_Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Mobile { get; set; } = string.Empty;
-      
+
 }
 public class AreaResponse
 {
@@ -531,7 +534,7 @@ public class UpdateAddressRequest
 
     public string House_No { get; set; } = string.Empty;
 
-    public int Area_Id { get; set; }       
+    public int Area_Id { get; set; }
 
     public string Extra_Direction { get; set; } = string.Empty;
 
@@ -571,7 +574,7 @@ public class UserAddressResponse
 public class AddressDTO
 {
 
-    public long Address_Id { get; set; }     
+    public long Address_Id { get; set; }
 
     public string Address_Name { get; set; } = string.Empty;
 
@@ -609,16 +612,16 @@ public class OrderResponse
 }
 
 public class OrderRequest
-{       
+{
     public string Remarks { get; set; } = string.Empty;
     public string App_User_Id { get; set; } = string.Empty;
-    public short Payment_Type_Id { get; set; }                   
+    public short Payment_Type_Id { get; set; }
     public long? Address_Id { get; set; }
     public string Cust_Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string? Mobile { get; set; } = string.Empty;
-    public short Delivery_Type { get; set; }     
-    public short Channel_Id { get; set; }            
+    public short Delivery_Type { get; set; }
+    public short Channel_Id { get; set; }
     public string Promo_Code { get; set; } = string.Empty;
     public long Branch_Id { get; set; }
     public string? Gift_Msg { get; set; } = string.Empty;
@@ -643,10 +646,10 @@ public class OrderDetailDTO
 {
     public long Prod_Id { get; set; }
     public string Prod_Name { get; set; } = string.Empty;
-    public int Qty { get; set; }           
+    public int Qty { get; set; }
     public string Promo_Code { get; set; } = string.Empty;
-    public List<long> Product_AddOn_Ids { get; set; }           
-    public string Remarks { get; set; } = string.Empty;     
+    public List<long> Product_AddOn_Ids { get; set; }
+    public string Remarks { get; set; } = string.Empty;
     public decimal Rate { get; set; }
     public decimal Amount { get; set; }
     public decimal Gross_Amount { get; set; } // gross amt is sum of amount + addons amount
@@ -671,7 +674,7 @@ public class DriverOrderResponse
 
     }
 }
-    
+
 public class DriverOrderRequest
 {
     public long Order_Id { get; set; }
@@ -697,7 +700,7 @@ public class OrderDetailResponse
     public string Order_No { get; set; } = string.Empty;
     public AddressCoordinatesDTO Pickup_Address { get; set; }
     public AddressCoordinatesDTO Delivery_Address { get; set; }
-    public string Order_Date { get; set; } = string.Empty;      
+    public string Order_Date { get; set; } = string.Empty;
     public string Cust_Name { get; set; } = string.Empty;
     public string Mobile { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -729,19 +732,20 @@ public class DriverOrderDetailDTO
 {
     public long Order_Detail_Id { get; set; }
     public string Prod_Name { get; set; } = string.Empty;
-    public int Qty { get; set; }             
-    public decimal Rate { get; set; }      
-    public decimal Gross_Amount { get; set; } 
+    public int Qty { get; set; }
+    public decimal Rate { get; set; }
+    public decimal Gross_Amount { get; set; }
     public decimal AddOn_Amount { get; set; }
     public decimal Net_Amount { get; set; }
     public string Remarks { get; set; } = string.Empty;
     public List<CartCateringProductsDTO> Catering_Products { get; set; }
-    public DriverOrderDetailDTO() {
+    public DriverOrderDetailDTO()
+    {
         Catering_Products = new List<CartCateringProductsDTO>();
     }
 }
 public class AddressCoordinatesDTO
-{        
+{
     public string Address { get; set; } = string.Empty;
     public decimal Latitude { get; set; }
     public decimal Longitude { get; set; }
@@ -781,7 +785,8 @@ public class OrderPaymentResponse
     public string Payment_Date { get; set; } = string.Empty;
 }
 
-public class FavoriteRequest {
+public class FavoriteRequest
+{
     public long Product_Id { get; set; }
     public string App_User_Id { get; set; } = string.Empty;
 }
@@ -798,7 +803,8 @@ public class ChefDetailResponse
         Products = new List<ProductDTO>();
     }
 }
-public class CacaooMapResponse {
+public class CacaooMapResponse
+{
     public int Status { get; set; }
     public string Message { get; set; } = "";
     public List<MapDTO> Branches { get; set; }
@@ -807,7 +813,8 @@ public class CacaooMapResponse {
         Branches = new List<MapDTO>();
     }
 }
-public class MapDTO {
+public class MapDTO
+{
     public string Restaurant_Name { get; set; } = "";
     public string Branch_Name { get; set; } = "";
     public string Branch_Address { get; set; } = "";
@@ -818,7 +825,7 @@ public class MapDTO {
 public class RatingRequest
 {
     public long Order_Detail_Id { get; set; }
-    public int Rating { get; set; }      
+    public int Rating { get; set; }
 
 }
 public class TrackingRequest
@@ -833,7 +840,7 @@ public class TrackingRequest
 public class TrackingResponse
 {
     public int Status { get; set; }
-    public string Message { get; set; } = "";       
+    public string Message { get; set; } = "";
     public decimal Latitude { get; set; }
     public decimal Longitude { get; set; }
 
@@ -862,7 +869,7 @@ public class UpdatePasswordRequest
     public string App_User_Id { get; set; } = string.Empty;
     public string Old_Password { get; set; } = string.Empty;
     public string New_Password { get; set; } = string.Empty;
-       
+
 
 }
 public class NotificationDTO

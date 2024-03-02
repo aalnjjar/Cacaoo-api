@@ -40,6 +40,7 @@ public class SM_Products
     public bool Is_Catering { get; set; }
     public bool Is_Catering_Menu_Product { get; set; }
     public int PreparationTime { get; set; }
+    public bool IsCustomizable { get; set; }
 
     [NotMapped] public IFormFile? Image_File { get; set; }
     [NotMapped] public long Category_Id { get; set; }

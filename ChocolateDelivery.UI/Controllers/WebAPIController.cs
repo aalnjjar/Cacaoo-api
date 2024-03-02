@@ -710,8 +710,8 @@ public class WebApiController : ControllerBase
 
                         var groupItems = groupBc.GetGroupDetails(group.Group_Id);
                         groupItems = (from o in groupItems
-                            orderby o.Sequence
-                            select o).ToList();
+                                      orderby o.Sequence
+                                      select o).ToList();
 
 
                         foreach (var currentevent in groupItems)
@@ -833,6 +833,7 @@ public class WebApiController : ControllerBase
                                 : currentevent.Brand_Name_A ?? "",
                             Is_Exclusive = currentevent.Is_Exclusive,
                             Is_Catering = currentevent.Is_Catering,
+                            IsCustomizable = currentevent.IsCustomizable,
                             Brand_id = currentevent.Brand_Id,
                             PreparationTime = currentevent.PreparationTime,
                             DeliveryTime = currentevent.DeliveryTime ?? string.Empty
@@ -1013,6 +1014,7 @@ public class WebApiController : ControllerBase
                                     Image_Url = product.Image_URL ?? "",
                                     Is_Exclusive = product.Is_Exclusive,
                                     Is_Catering = product.Is_Catering,
+                                    IsCustomizable = product.IsCustomizable,
                                     DeliveryTime = product.DeliveryTime,
                                     PreparationTime = product.PreparationTime
                                 };
@@ -1210,6 +1212,7 @@ public class WebApiController : ControllerBase
                                     ? currentevent.Brand_Name_E ?? ""
                                     : currentevent.Brand_Name_A ?? "",
                                 DeliveryTime = currentevent.DeliveryTime ?? string.Empty,
+                                IsCustomizable = currentevent.IsCustomizable,
                                 PreparationTime = currentevent.PreparationTime
                             };
                             response.Products.Add(eventsDto);
@@ -2427,7 +2430,7 @@ public class WebApiController : ControllerBase
                                 //tapChargeRequest.source = new Source { id = "src_kw.knet" };
                                 source = new Source { id = paymentId },
                                 reference = new Reference
-                                    { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
+                                { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
                                 receipt = new Receipt { email = true, sms = true }
                             };
                             var customer = new TapCustomer
@@ -2978,7 +2981,8 @@ public class WebApiController : ControllerBase
                                 Image_Url = currentevent.Image_URL ?? "",
                                 Brand_Name = lang.ToUpper() == "E"
                                     ? currentevent.Brand_Name_E ?? ""
-                                    : currentevent.Brand_Name_A ?? ""
+                                    : currentevent.Brand_Name_A ?? "",
+                                IsCustomizable = currentevent.IsCustomizable
                             };
                             response.Products.Add(eventsDto);
                         }
