@@ -288,7 +288,18 @@ public class SubCategoryDTO
     public string Sub_Category_Name { get; set; } = "";
     public string Image_URL { get; set; } = "";
     public string Background_Color { get; set; } = "";
+    public List<LeafCategoryDTO> LeafCategories { get; set; }
+    
 }
+
+public class LeafCategoryDTO
+{
+    public long Leaf_Category_Id { get; set; }
+    public string Leaf_Category_Name { get; set; } = "";
+    public string Image_URL { get; set; } = "";
+    public string Background_Color { get; set; } = "";
+}
+
 public class SubCategoryResponse
 {
     public int Status { get; set; }
