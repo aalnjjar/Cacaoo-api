@@ -127,7 +127,9 @@ public class CateringCategoryDTO
 public class CateringOptionDTO
 {
     public long Cateroing_Product_Id { get; set; }
-    public string Option_Name { get; set; } = "";      
+    public string Option_Name { get; set; } = "";
+    public int Max { get; set; }
+    public int Min { get; set; }
 
 }
 public class CartResponse
