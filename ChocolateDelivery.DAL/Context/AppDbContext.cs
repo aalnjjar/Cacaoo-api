@@ -54,6 +54,7 @@ public class AppDbContext : DbContext
     public DbSet<SM_Restaurant_AddOns> sm_restaurant_addons { get; set; }
     public DbSet<SM_Restaurant_Branches> sm_restaurant_branches { get; set; }
     public DbSet<SM_Sub_Categories> sm_sub_categories { get; set; }
+    public DbSet<SM_Leaf_Categories> sm_leaf_categories { get; set; }
     public DbSet<SM_USER_GROUP_RIGHTS> sm_user_group_rights { get; set; }
     public DbSet<SM_USER_GROUP_DASHBOARD> sm_user_group_dashboard { get; set; }
     public DbSet<SM_USER_GROUPS> sm_user_groups { get; set; }

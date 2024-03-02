@@ -31,4 +31,8 @@
         <ProjectReference Include="..\ChocolateDelivery.DAL\ChocolateDelivery.DAL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <AdditionalFiles Include="Areas\Admin\Views\LeafCategory\Create.cshtml" />
+    </ItemGroup>
+
 </Project>
