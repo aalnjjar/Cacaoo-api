@@ -480,7 +480,16 @@ public class WebApiController : ControllerBase
                                     ? subCategory.Sub_Category_Name_A ?? subCategory.Sub_Category_Name_E
                                     : subCategory.Sub_Category_Name_E,
                                 Image_URL = subCategory.Image_URL ?? "",
-                                Background_Color = subCategory.Background_Color ?? ""
+                                Background_Color = subCategory.Background_Color ?? "",
+                                LeafCategories = subCategory.Leaf_Categories.Select(lc => new LeafCategoryDTO()
+                                {
+                                    Leaf_Category_Id = lc.Leaf_Category_Id,
+                                    Leaf_Category_Name = lang == "A"
+                                        ? lc.Leaf_Category_Name_A ?? lc.Leaf_Category_Name_E
+                                        : lc.Leaf_Category_Name_E,
+                                    Background_Color = lc.Background_Color,
+                                    Image_URL = lc.Image_URL
+                                }).ToList()
                             };
                             eventsDto.SubCategories.Add(subCategoryDto);
                         }
@@ -550,7 +559,16 @@ public class WebApiController : ControllerBase
                                 ? subCategory.Sub_Category_Name_A ?? subCategory.Sub_Category_Name_E
                                 : subCategory.Sub_Category_Name_E,
                             Image_URL = subCategory.Image_URL ?? "",
-                            Background_Color = subCategory.Background_Color ?? ""
+                            Background_Color = subCategory.Background_Color ?? "",
+                            LeafCategories = subCategory.Leaf_Categories.Select(lc => new LeafCategoryDTO()
+                            {
+                                Leaf_Category_Id = lc.Leaf_Category_Id,
+                                Leaf_Category_Name = lang == "A"
+                                    ? lc.Leaf_Category_Name_A ?? lc.Leaf_Category_Name_E
+                                    : lc.Leaf_Category_Name_E,
+                                Background_Color = lc.Background_Color,
+                                Image_URL = lc.Image_URL
+                            }).ToList()
                         };
                         response.SubCategories.Add(subCategoryDto);
                     }
@@ -833,7 +851,10 @@ public class WebApiController : ControllerBase
                                 : currentevent.Brand_Name_A ?? "",
                             Is_Exclusive = currentevent.Is_Exclusive,
                             Is_Catering = currentevent.Is_Catering,
-                            Brand_id = currentevent.Brand_Id
+                            IsCustomizable = currentevent.IsCustomizable,
+                            Brand_id = currentevent.Brand_Id,
+                            PreparationTime = currentevent.PreparationTime,
+                            DeliveryTime = currentevent.DeliveryTime ?? string.Empty
                         };
                         response.Products.Add(eventsDto);
                     }
@@ -1010,7 +1031,10 @@ public class WebApiController : ControllerBase
                                     Price = product.Price,
                                     Image_Url = product.Image_URL ?? "",
                                     Is_Exclusive = product.Is_Exclusive,
-                                    Is_Catering = product.Is_Catering
+                                    Is_Catering = product.Is_Catering,
+                                    IsCustomizable = product.IsCustomizable,
+                                    DeliveryTime = product.DeliveryTime,
+                                    PreparationTime = product.PreparationTime
                                 };
                                 categoryDto.Products.Add(productDto);
                             }
@@ -1204,7 +1228,10 @@ public class WebApiController : ControllerBase
                                 Image_Url = currentevent.Image_URL ?? "",
                                 Brand_Name = lang.ToUpper() == "E"
                                     ? currentevent.Brand_Name_E ?? ""
-                                    : currentevent.Brand_Name_A ?? ""
+                                    : currentevent.Brand_Name_A ?? "",
+                                DeliveryTime = currentevent.DeliveryTime ?? string.Empty,
+                                IsCustomizable = currentevent.IsCustomizable,
+                                PreparationTime = currentevent.PreparationTime
                             };
                             response.Products.Add(eventsDto);
                         }
@@ -1321,6 +1348,8 @@ public class WebApiController : ControllerBase
                             App_User_Id = appUserDm.App_User_Id,
                             Product_Id = cartRequest.Product_Id,
                             Qty = cartRequest.Qty,
+                            Message = cartRequest.Message,
+                            Link = cartRequest.Link,
                             Created_Datetime = StaticMethods.GetKuwaitTime(),
                             Comments = cartRequest.Comments
                         };
@@ -2078,425 +2107,423 @@ public class WebApiController : ControllerBase
 
     [Route("SaveOrder")]
     [HttpPost]
-    public OrderResponse SaveOrder(OrderRequest orderRequest)
+    public async Task<OrderResponse> SaveOrder(OrderRequest orderRequest)
     {
         var securityKey = "";
         var response = new OrderResponse();
-        using (var scope = new TransactionScope())
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            try
+            if (!Request.Headers.ContainsKey("X-Cacaoo-SecurityToken"))
             {
-                if (!Request.Headers.ContainsKey("X-Cacaoo-SecurityToken"))
+                response.Status = 105;
+                response.Message = ServiceResponse.NoSecurityKey;
+            }
+            else
+            {
+                securityKey = Request.Headers["X-Cacaoo-SecurityToken"];
+                //Check session token
+                var isAuthorized = ValidateSecurityKey(securityKey);
+
+                if (isAuthorized == false)
                 {
-                    response.Status = 105;
-                    response.Message = ServiceResponse.NoSecurityKey;
+                    response.Status = 106;
+                    response.Message = ServiceResponse.Unauthorized;
                 }
                 else
                 {
-                    securityKey = Request.Headers["X-Cacaoo-SecurityToken"];
-                    //Check session token
-                    var isAuthorized = ValidateSecurityKey(securityKey);
-
-                    if (isAuthorized == false)
+                    Helpers.WriteToFile(_logPath,
+                        "Order Request:" + JsonConvert.SerializeObject(orderRequest));
+                    var lang = "E";
+                    if (Request.Headers.ContainsKey("X-Cacaoo-Lang") && Request.Headers["X-Cacaoo-Lang"] == "A")
                     {
-                        response.Status = 106;
-                        response.Message = ServiceResponse.Unauthorized;
+                        lang = "A";
                     }
-                    else
+
+                    if (string.IsNullOrEmpty(orderRequest.App_User_Id))
                     {
-                        Helpers.WriteToFile(_logPath,
-                            "Order Request:" + JsonConvert.SerializeObject(orderRequest));
-                        var lang = "E";
-                        if (Request.Headers.ContainsKey("X-Cacaoo-Lang") && Request.Headers["X-Cacaoo-Lang"] == "A")
-                        {
-                            lang = "A";
-                        }
+                        response.Status = 101;
+                        response.Message = "App User Id cannot be empty";
+                        return response;
+                    }
 
-                        if (string.IsNullOrEmpty(orderRequest.App_User_Id))
-                        {
-                            response.Status = 101;
-                            response.Message = "App User Id cannot be empty";
-                            return response;
-                        }
+                    if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY &&
+                        (orderRequest.Address_Id == null || orderRequest.Address_Id == 0))
+                    {
+                        response.Status = 101;
+                        response.Message = "Please select the address";
+                        return response;
+                    }
 
-                        if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY &&
-                            (orderRequest.Address_Id == null || orderRequest.Address_Id == 0))
-                        {
-                            response.Status = 101;
-                            response.Message = "Please select the address";
-                            return response;
-                        }
+                    if (orderRequest.OrderDetails.Count == 0)
+                    {
+                        response.Status = 101;
+                        response.Message = "Order Details cannot be empty";
+                        return response;
+                    }
 
-                        if (orderRequest.OrderDetails.Count == 0)
-                        {
-                            response.Status = 101;
-                            response.Message = "Order Details cannot be empty";
-                            return response;
-                        }
+                    if (orderRequest.Branch_Id == 0)
+                    {
+                        response.Status = 101;
+                        response.Message = "Branch cannot be empty";
+                        return response;
+                    }
 
-                        if (orderRequest.Branch_Id == 0)
-                        {
-                            response.Status = 101;
-                            response.Message = "Branch cannot be empty";
-                            return response;
-                        }
+                    if (orderRequest.Delivery_Type == Delivery_Types.PICKUP &&
+                        string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
+                    {
+                        response.Status = 101;
+                        response.Message = "Please choose pick up time";
+                        return response;
+                    }
 
-                        if (orderRequest.Delivery_Type == Delivery_Types.PICKUP &&
-                            string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
-                        {
-                            response.Status = 101;
-                            response.Message = "Please choose pick up time";
-                            return response;
-                        }
+                    var appUserService = new AppUserService(_context);
+                    var cartBc = new CartService(_context);
+                    var productService = new ProductService(_context);
+                    var restaurantService = new RestaurantService(_context);
+                    var orderService = new OrderService(_context);
 
-                        var appUserService = new AppUserService(_context);
-                        var cartBc = new CartService(_context);
-                        var productService = new ProductService(_context);
-                        var restaurantService = new RestaurantService(_context);
-                        var orderService = new OrderService(_context);
+                    var firstprodDm = productService.GetProduct(orderRequest.OrderDetails.FirstOrDefault().Prod_Id);
+                    if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY && firstprodDm.Is_Gift_Product &&
+                        string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
+                    {
+                        response.Status = 101;
+                        response.Message = "Please choose delivery time";
+                        return response;
+                    }
 
-                        var firstprodDm = productService.GetProduct(orderRequest.OrderDetails.FirstOrDefault().Prod_Id);
-                        if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY && firstprodDm.Is_Gift_Product &&
-                            string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
+                    var rowId = new Guid(orderRequest.App_User_Id);
+                    var appUserDm = appUserService.GetAppUserByRowId(rowId);
+                    if (appUserDm != null)
+                    {
+                        var orderType = OrderTypes.NORMAL;
+                        var grossAmt = decimal.Zero;
+                        var deliveryCharge = decimal.Zero;
+                        var redeemAmt = orderRequest.Redeem_Amount ?? 0;
+                        var restaurantDm = new SM_Restaurants();
+                        foreach (var detail in orderRequest.OrderDetails)
                         {
-                            response.Status = 101;
-                            response.Message = "Please choose delivery time";
-                            return response;
-                        }
-
-                        var rowId = new Guid(orderRequest.App_User_Id);
-                        var appUserDm = appUserService.GetAppUserByRowId(rowId);
-                        if (appUserDm != null)
-                        {
-                            var orderType = OrderTypes.NORMAL;
-                            var grossAmt = decimal.Zero;
-                            var deliveryCharge = decimal.Zero;
-                            var redeemAmt = orderRequest.Redeem_Amount ?? 0;
-                            var restaurantDm = new SM_Restaurants();
-                            foreach (var detail in orderRequest.OrderDetails)
+                            var prodDm = productService.GetProduct(detail.Prod_Id);
+                            if (prodDm == null)
                             {
-                                var prodDm = productService.GetProduct(detail.Prod_Id);
-                                if (prodDm == null)
+                                response.Status = 101;
+                                response.Message = "Some or all products not found";
+                                return response;
+                            }
+                            else
+                            {
+                                restaurantDm = restaurantService.GetRestaurant(prodDm.Restaurant_Id);
+                                if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY)
+                                    deliveryCharge = restaurantDm.Delivery_Charge;
+
+                                grossAmt += prodDm.Price * detail.Qty;
+                                detail.Gross_Amount = prodDm.Price * detail.Qty;
+                                detail.Amount = prodDm.Price * detail.Qty;
+                                detail.Rate = prodDm.Price;
+                                detail.Prod_Name = prodDm.Product_Name_E;
+                                if (prodDm.Is_Gift_Product)
                                 {
-                                    response.Status = 101;
-                                    response.Message = "Some or all products not found";
-                                    return response;
+                                    orderType = OrderTypes.GIFT;
                                 }
-                                else
-                                {
-                                    restaurantDm = restaurantService.GetRestaurant(prodDm.Restaurant_Id);
-                                    if (orderRequest.Delivery_Type == Delivery_Types.DELIVERY)
-                                        deliveryCharge = restaurantDm.Delivery_Charge;
-
-                                    grossAmt += prodDm.Price * detail.Qty;
-                                    detail.Gross_Amount = prodDm.Price * detail.Qty;
-                                    detail.Amount = prodDm.Price * detail.Qty;
-                                    detail.Rate = prodDm.Price;
-                                    detail.Prod_Name = prodDm.Product_Name_E;
-                                    if (prodDm.Is_Gift_Product)
-                                    {
-                                        orderType = OrderTypes.GIFT;
-                                    }
-
-                                    foreach (var addonId in detail.Product_AddOn_Ids)
-                                    {
-                                        var addOnDm = productService.GetProductAddOn(addonId);
-                                        if (addOnDm == null)
-                                        {
-                                            response.Status = 101;
-                                            response.Message = "Invalid AddonId for product :" +
-                                                               prodDm.Product_Name_E;
-                                            return response;
-                                        }
-                                        else
-                                        {
-                                            grossAmt += addOnDm.Price;
-                                            detail.Gross_Amount = detail.Gross_Amount + addOnDm.Price;
-                                        }
-                                    }
-
-                                    foreach (var categoryProduct in detail.Catering_Products)
-                                    {
-                                        var cateringProductDm =
-                                            productService.GetProductCateringProduct(categoryProduct
-                                                .Catering_Product_Id);
-                                        if (cateringProductDm == null)
-                                        {
-                                            response.Status = 101;
-                                            response.Message = "Invalid Catering_Product_Id : " +
-                                                               categoryProduct.Catering_Product_Id +
-                                                               " for product :" + prodDm.Product_Name_E;
-                                            return response;
-                                        }
-                                        else if (cateringProductDm.Product_Id != detail.Prod_Id)
-                                        {
-                                            response.Status = 101;
-                                            response.Message = " Catering_Product_Id : " +
-                                                               categoryProduct.Catering_Product_Id +
-                                                               " does not belong to product :" +
-                                                               prodDm.Product_Name_E;
-                                            return response;
-                                        }
-                                    }
-                                }
-                            }
-
-                            var netAmt = grossAmt + deliveryCharge - redeemAmt;
-
-                            var orderDm = new TXN_Orders
-                            {
-                                Order_No = orderService.GetNextOrderNo()
-                            };
-                            orderDm.Order_Serial = "ORD_" + orderDm.Order_No.ToString("D6");
-                            orderDm.Order_Datetime = StaticMethods.GetKuwaitTime();
-                            orderDm.App_User_Id = appUserDm.App_User_Id;
-                            orderDm.Address_Id = orderRequest.Address_Id;
-                            orderDm.Payment_Type_Id = orderRequest.Payment_Type_Id;
-                            orderDm.Channel_Id = orderRequest.Channel_Id;
-                            orderDm.Delivery_Type = orderRequest.Delivery_Type;
-                            orderDm.Comments = orderRequest.Remarks;
-                            orderDm.Cust_Name = orderRequest.Cust_Name;
-                            orderDm.Email = orderRequest.Email;
-                            orderDm.Mobile = orderRequest.Mobile;
-                            orderDm.Gross_Amount = grossAmt;
-                            orderDm.Discount_Amount = 0;
-                            orderDm.Delivery_Charges = deliveryCharge;
-                            orderDm.Net_Amount = netAmt;
-                            if (orderRequest.Payment_Type_Id == PaymentTypes.Cash)
-                            {
-                                //orderDM.Status_Id = OrderStatus.ORDER_RECEIVED;
-                                orderDm.Status_Id = OrderStatus.ORDER_PREPARING;
-                            }
-                            else if (orderRequest.Payment_Type_Id == PaymentTypes.KNET ||
-                                     orderRequest.Payment_Type_Id == PaymentTypes.CreditCard ||
-                                     orderRequest.Payment_Type_Id == PaymentTypes.ApplePay)
-                            {
-                                orderDm.Status_Id = OrderStatus.ORDER_PROCESSING_PAYMENT;
-                            }
-
-                            orderDm.Promo_Code = orderRequest.Promo_Code;
-                            orderDm.Restaurant_Id = restaurantDm.Restaurant_Id;
-                            orderDm.Row_Id = Guid.NewGuid();
-                            orderDm.Branch_Id = orderRequest.Branch_Id;
-                            orderDm.Order_Type = orderType;
-                            orderDm.Gift_Msg = orderRequest.Gift_Msg;
-                            orderDm.Recepient_Name = orderRequest.Recepient_Name;
-                            orderDm.Recepient_Mobile = orderRequest.Recepient_Mobile;
-                            orderDm.Video_Link = orderRequest.Video_Link;
-                            orderDm.Show_Sender_Name = true;
-                            if (orderRequest.Show_Sender_Name != null)
-                            {
-                                orderDm.Show_Sender_Name = orderRequest.Show_Sender_Name ?? true;
-                            }
-
-                            if (!string.IsNullOrEmpty(orderRequest.Video_File))
-                            {
-                                var bytes = Convert.FromBase64String(orderRequest.Video_File);
-                                var videoPathDir = "assets/videos/";
-                                var fileName = StaticMethods.GetKuwaitTime().ToString("yyyyMMddHHmmssfff") + ".mp4";
-                                var path = Path.Combine(_webHostEnvironment.WebRootPath, videoPathDir);
-                                var filePath = Path.Combine(path, fileName);
-                                System.IO.File.WriteAllBytes(filePath, bytes);
-
-                                orderDm.Video_File_Path = videoPathDir + fileName;
-                            }
-
-                            orderDm.Redeem_Amount = redeemAmt;
-                            orderDm.Redeem_Points = orderRequest.Redeem_Points ?? 0;
-                            if (!string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
-                            {
-                                orderDm.Pickup_Datetime = DateTime.ParseExact(orderRequest.Pickup_Datetime,
-                                    "dd-MMM-yyyy hh:mm tt", CultureInfo.InvariantCulture);
-                            }
-
-                            orderService.SaveOrder(orderDm);
-
-                            foreach (var detail in orderRequest.OrderDetails)
-                            {
-                                var orderDetailDm = new TXN_Order_Details
-                                {
-                                    Order_Id = orderDm.Order_Id,
-                                    Product_Id = detail.Prod_Id,
-                                    Product_Name = detail.Prod_Name,
-                                    Qty = detail.Qty,
-                                    Rate = detail.Rate,
-                                    Amount = detail.Amount,
-                                    Gross_Amount = detail.Gross_Amount,
-                                    Discount_Amount = 0
-                                };
-                                orderDetailDm.Net_Amount =
-                                    orderDetailDm.Gross_Amount - orderDetailDm.Discount_Amount;
-                                orderDetailDm.Promo_Code = detail.Promo_Code;
-                                orderDetailDm.Comments = detail.Remarks;
-                                orderService.SaveOrderDetail(orderDetailDm);
 
                                 foreach (var addonId in detail.Product_AddOn_Ids)
                                 {
                                     var addOnDm = productService.GetProductAddOn(addonId);
-                                    var addOns = new TXN_Order_Detail_AddOns
+                                    if (addOnDm == null)
                                     {
-                                        Order_Detail_Id = orderDetailDm.Order_Detail_Id,
-                                        Product_AddOnId = addonId,
-                                        Price = addOnDm.Price
-                                    };
-                                    orderService.SaveOrderDetailAddon(addOns);
+                                        response.Status = 101;
+                                        response.Message = "Invalid AddonId for product :" +
+                                                           prodDm.Product_Name_E;
+                                        return response;
+                                    }
+                                    else
+                                    {
+                                        grossAmt += addOnDm.Price;
+                                        detail.Gross_Amount = detail.Gross_Amount + addOnDm.Price;
+                                    }
                                 }
 
-                                foreach (var cateringProduct in detail.Catering_Products)
+                                foreach (var categoryProduct in detail.Catering_Products)
                                 {
-                                    var addOns =
-                                        new TXN_Order_Detail_Catering_Products
-                                        {
-                                            Detail_Id = orderDetailDm.Order_Detail_Id,
-                                            Category_Product_Id = cateringProduct.Catering_Product_Id,
-                                            Qty = cateringProduct.Qty
-                                        };
-                                    orderService.SaveOrderDetailCateringProduct(addOns);
+                                    var cateringProductDm =
+                                        productService.GetProductCateringProduct(categoryProduct
+                                            .Catering_Product_Id);
+                                    if (cateringProductDm == null)
+                                    {
+                                        response.Status = 101;
+                                        response.Message = "Invalid Catering_Product_Id : " +
+                                                           categoryProduct.Catering_Product_Id +
+                                                           " for product :" + prodDm.Product_Name_E;
+                                        return response;
+                                    }
+                                    else if (cateringProductDm.Product_Id != detail.Prod_Id)
+                                    {
+                                        response.Status = 101;
+                                        response.Message = " Catering_Product_Id : " +
+                                                           categoryProduct.Catering_Product_Id +
+                                                           " does not belong to product :" +
+                                                           prodDm.Product_Name_E;
+                                        return response;
+                                    }
                                 }
                             }
+                        }
 
-                            var log = new TXN_Order_Logs
+                        var netAmt = grossAmt + deliveryCharge - redeemAmt;
+
+                        var orderDm = new TXN_Orders
+                        {
+                            Order_No = orderService.GetNextOrderNo()
+                        };
+                        orderDm.Order_Serial = "ORD_" + orderDm.Order_No.ToString("D6");
+                        orderDm.Order_Datetime = StaticMethods.GetKuwaitTime();
+                        orderDm.App_User_Id = appUserDm.App_User_Id;
+                        orderDm.Address_Id = orderRequest.Address_Id;
+                        orderDm.Payment_Type_Id = orderRequest.Payment_Type_Id;
+                        orderDm.Channel_Id = orderRequest.Channel_Id;
+                        orderDm.Delivery_Type = orderRequest.Delivery_Type;
+                        orderDm.Comments = orderRequest.Remarks;
+                        orderDm.Cust_Name = orderRequest.Cust_Name;
+                        orderDm.Email = orderRequest.Email;
+                        orderDm.Mobile = orderRequest.Mobile;
+                        orderDm.Gross_Amount = grossAmt;
+                        orderDm.Discount_Amount = 0;
+                        orderDm.Delivery_Charges = deliveryCharge;
+                        orderDm.Net_Amount = netAmt;
+                        if (orderRequest.Payment_Type_Id == PaymentTypes.Cash)
+                        {
+                            //orderDM.Status_Id = OrderStatus.ORDER_RECEIVED;
+                            orderDm.Status_Id = OrderStatus.ORDER_PREPARING;
+                        }
+                        else if (orderRequest.Payment_Type_Id == PaymentTypes.KNET ||
+                                 orderRequest.Payment_Type_Id == PaymentTypes.CreditCard ||
+                                 orderRequest.Payment_Type_Id == PaymentTypes.ApplePay)
+                        {
+                            orderDm.Status_Id = OrderStatus.ORDER_PROCESSING_PAYMENT;
+                        }
+
+                        orderDm.Promo_Code = orderRequest.Promo_Code;
+                        orderDm.Restaurant_Id = restaurantDm.Restaurant_Id;
+                        orderDm.Row_Id = Guid.NewGuid();
+                        orderDm.Branch_Id = orderRequest.Branch_Id;
+                        orderDm.Order_Type = orderType;
+                        orderDm.Gift_Msg = orderRequest.Gift_Msg;
+                        orderDm.Recepient_Name = orderRequest.Recepient_Name;
+                        orderDm.Recepient_Mobile = orderRequest.Recepient_Mobile;
+                        orderDm.Video_Link = orderRequest.Video_Link;
+                        orderDm.Show_Sender_Name = true;
+                        if (orderRequest.Show_Sender_Name != null)
+                        {
+                            orderDm.Show_Sender_Name = orderRequest.Show_Sender_Name ?? true;
+                        }
+
+                        if (!string.IsNullOrEmpty(orderRequest.Video_File))
+                        {
+                            var bytes = Convert.FromBase64String(orderRequest.Video_File);
+                            var videoPathDir = "assets/videos/";
+                            var fileName = StaticMethods.GetKuwaitTime().ToString("yyyyMMddHHmmssfff") + ".mp4";
+                            var path = Path.Combine(_webHostEnvironment.WebRootPath, videoPathDir);
+                            var filePath = Path.Combine(path, fileName);
+                            System.IO.File.WriteAllBytes(filePath, bytes);
+
+                            orderDm.Video_File_Path = videoPathDir + fileName;
+                        }
+
+                        orderDm.Redeem_Amount = redeemAmt;
+                        orderDm.Redeem_Points = orderRequest.Redeem_Points ?? 0;
+                        if (!string.IsNullOrEmpty(orderRequest.Pickup_Datetime))
+                        {
+                            orderDm.Pickup_Datetime = DateTime.ParseExact(orderRequest.Pickup_Datetime,
+                                "dd-MMM-yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                        }
+
+                        orderService.SaveOrder(orderDm);
+
+                        foreach (var detail in orderRequest.OrderDetails)
+                        {
+                            var orderDetailDm = new TXN_Order_Details
                             {
                                 Order_Id = orderDm.Order_Id,
-                                Status_Id = orderDm.Status_Id,
-                                Created_Datetime = StaticMethods.GetKuwaitTime(),
-                                Comments = "Order Placed with Order #" + orderDm.Order_Serial
+                                Product_Id = detail.Prod_Id,
+                                Product_Name = detail.Prod_Name,
+                                Qty = detail.Qty,
+                                Rate = detail.Rate,
+                                Amount = detail.Amount,
+                                Gross_Amount = detail.Gross_Amount,
+                                Discount_Amount = 0
                             };
-                            orderService.CreateOrderLog(log);
+                            orderDetailDm.Net_Amount =
+                                orderDetailDm.Gross_Amount - orderDetailDm.Discount_Amount;
+                            orderDetailDm.Promo_Code = detail.Promo_Code;
+                            orderDetailDm.Comments = detail.Remarks;
+                            orderService.SaveOrderDetail(orderDetailDm);
 
-
-                            if (orderRequest.Payment_Type_Id == PaymentTypes.Cash)
+                            foreach (var addonId in detail.Product_AddOn_Ids)
                             {
-                                SendOrderEmail(orderDm.Order_Id);
-
-                                #region clear cart after successful order
-
-                                cartBc.RemoveCart(appUserDm.App_User_Id);
-
-                                #endregion
-
-                                var notificationService = new NotificationService(_context, _logPath);
-                                notificationService.SendNotificationToDriver(orderDm.Order_Serial);
-
-                                var campaignDm = new APP_PUSH_CAMPAIGN
+                                var addOnDm = productService.GetProductAddOn(addonId);
+                                var addOns = new TXN_Order_Detail_AddOns
                                 {
-                                    Title_E = "Pick up Request",
-                                    Desc_E = "Please accept Order # " + orderDm.Order_Serial +
-                                             " for delivery",
-                                    Title_A = "Pick up Request",
-                                    Desc_A = "Please accept Order # " + orderDm.Order_Serial +
-                                             " for delivery",
-                                    Created_Datetime = StaticMethods.GetKuwaitTime()
+                                    Order_Detail_Id = orderDetailDm.Order_Detail_Id,
+                                    Product_AddOnId = addonId,
+                                    Price = addOnDm.Price
                                 };
-                                notificationService.CreatePushCampaign(campaignDm);
-
-                                var connectionString =
-                                    _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                                using (var con = new MySqlConnection(connectionString))
-                                {
-                                    con.Open();
-                                    using (var cmd = new MySqlCommand("InsertNotifications", con))
-                                    {
-                                        using (new MySqlDataAdapter(cmd))
-                                        {
-                                            cmd.CommandType = CommandType.StoredProcedure;
-                                            cmd.Parameters.AddWithValue("@Campaign_Id", campaignDm.Campaign_Id);
-                                            cmd.ExecuteReader();
-                                        }
-                                    }
-                                }
+                                orderService.SaveOrderDetailAddon(addOns);
                             }
 
-
-                            if (orderRequest.Payment_Type_Id != PaymentTypes.Cash)
+                            foreach (var cateringProduct in detail.Catering_Products)
                             {
-                                var paymentId = _context.sm_payment_types
-                                    .Where(s => s.Payment_Type_Id == orderRequest.Payment_Type_Id)
-                                    .Select(s => s.tap_payment_id)
-                                    .First();
-
-                                var tapChargeRequest = new TapChargeRequest
-                                {
-                                    amount = netAmt,
-                                    currency = "KWD",
-                                    //tapChargeRequest.source = new Source { id = "src_kw.knet" };
-                                    source = new Source { id = paymentId },
-                                    reference = new Reference
-                                        { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
-                                    receipt = new Receipt { email = true, sms = true }
-                                };
-                                var customer = new TapCustomer
-                                {
-                                    first_name = orderDm.Cust_Name,
-                                    email = orderDm.Email
-                                };
-                                var phone = new Phone();
-                                if (orderDm.Mobile.Length == 12)
-                                {
-                                    phone.country_code = Convert.ToInt32(orderDm.Mobile.Substring(1, 3));
-                                    phone.number = Convert.ToInt32(orderDm.Mobile.Substring(4));
-                                }
-                                else if (orderDm.Mobile.Length == 8)
-                                {
-                                    phone.country_code = 965;
-                                    phone.number = Convert.ToInt32(orderDm.Mobile);
-                                }
-
-                                customer.phone = phone;
-                                tapChargeRequest.customer = customer;
-                                var callBackUrl = _config.GetValue<string>("TapPayment:CallBackURL");
-                                tapChargeRequest.redirect = new Redirect { url = callBackUrl };
-                                var chargeResponse = TapPayment.CreateChargeRequest(tapChargeRequest, _config);
-                                if (chargeResponse != null)
-                                {
-                                    var redirectUrl = string.Empty;
-                                    if (chargeResponse.transaction != null &&
-                                        !string.IsNullOrEmpty(chargeResponse.transaction.url))
-                                        redirectUrl = chargeResponse.transaction.url;
-
-                                    if (!string.IsNullOrEmpty(redirectUrl))
+                                var addOns =
+                                    new TXN_Order_Detail_Catering_Products
                                     {
-                                        var paymentDm = new PAYMENTS
-                                        {
-                                            Order_Id = orderDm.Order_Id,
-                                            Amount = netAmt,
-                                            Track_Id = chargeResponse.id,
-                                            Created_Datetime = StaticMethods.GetKuwaitTime(),
-                                            Comments = ""
-                                        };
-                                        orderService.CreatePayment(paymentDm);
-
-                                        Helpers.WriteToFile(_logPath, "Redirecting to :" + redirectUrl, true);
-                                        response.Payment_Link = redirectUrl;
-                                    }
-                                }
+                                        Detail_Id = orderDetailDm.Order_Detail_Id,
+                                        Category_Product_Id = cateringProduct.Catering_Product_Id,
+                                        Qty = cateringProduct.Qty
+                                    };
+                                orderService.SaveOrderDetailCateringProduct(addOns);
                             }
-
-                            response.OrderId = orderDm.Order_Id;
-                            response.Status = 0;
-                            response.Message = ServiceResponse.Success;
-                            scope.Complete();
                         }
-                        else
+
+                        var log = new TXN_Order_Logs
                         {
-                            response.Status = 101;
-                            response.Message = "App User Not Found";
-                            return response;
+                            Order_Id = orderDm.Order_Id,
+                            Status_Id = orderDm.Status_Id,
+                            Created_Datetime = StaticMethods.GetKuwaitTime(),
+                            Comments = "Order Placed with Order #" + orderDm.Order_Serial
+                        };
+                        orderService.CreateOrderLog(log);
+
+
+                        if (orderRequest.Payment_Type_Id == PaymentTypes.Cash)
+                        {
+                            SendOrderEmail(orderDm.Order_Id);
+
+                            #region clear cart after successful order
+
+                            cartBc.RemoveCart(appUserDm.App_User_Id);
+
+                            #endregion
+
+                            var notificationService = new NotificationService(_context, _logPath);
+                            notificationService.SendNotificationToDriver(orderDm.Order_Serial);
+
+                            var campaignDm = new APP_PUSH_CAMPAIGN
+                            {
+                                Title_E = "Pick up Request",
+                                Desc_E = "Please accept Order # " + orderDm.Order_Serial +
+                                         " for delivery",
+                                Title_A = "Pick up Request",
+                                Desc_A = "Please accept Order # " + orderDm.Order_Serial +
+                                         " for delivery",
+                                Created_Datetime = StaticMethods.GetKuwaitTime()
+                            };
+                            notificationService.CreatePushCampaign(campaignDm);
+
+                            var connectionString =
+                                _config.GetValue<string>("ConnectionStrings:DefaultConnection");
+                            using (var con = new MySqlConnection(connectionString))
+                            {
+                                con.Open();
+                                using (var cmd = new MySqlCommand("InsertNotifications", con))
+                                {
+                                    using (new MySqlDataAdapter(cmd))
+                                    {
+                                        cmd.CommandType = CommandType.StoredProcedure;
+                                        cmd.Parameters.AddWithValue("@Campaign_Id", campaignDm.Campaign_Id);
+                                        cmd.ExecuteReader();
+                                    }
+                                }
+                            }
                         }
+
+
+                        if (orderRequest.Payment_Type_Id != PaymentTypes.Cash)
+                        {
+                            var paymentId = _context.sm_payment_types
+                                .Where(s => s.Payment_Type_Id == orderRequest.Payment_Type_Id)
+                                .Select(s => s.tap_payment_id)
+                                .First();
+
+                            var tapChargeRequest = new TapChargeRequest
+                            {
+                                amount = netAmt,
+                                currency = "KWD",
+                                //tapChargeRequest.source = new Source { id = "src_kw.knet" };
+                                source = new Source { id = paymentId },
+                                reference = new Reference
+                                    { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
+                                receipt = new Receipt { email = true, sms = true }
+                            };
+                            var customer = new TapCustomer
+                            {
+                                first_name = orderDm.Cust_Name,
+                                email = orderDm.Email
+                            };
+                            var phone = new Phone();
+                            if (orderDm.Mobile.Length == 12)
+                            {
+                                phone.country_code = Convert.ToInt32(orderDm.Mobile.Substring(1, 3));
+                                phone.number = Convert.ToInt32(orderDm.Mobile.Substring(4));
+                            }
+                            else if (orderDm.Mobile.Length == 8)
+                            {
+                                phone.country_code = 965;
+                                phone.number = Convert.ToInt32(orderDm.Mobile);
+                            }
+
+                            customer.phone = phone;
+                            tapChargeRequest.customer = customer;
+                            var callBackUrl = _config.GetValue<string>("TapPayment:CallBackURL");
+                            tapChargeRequest.redirect = new Redirect { url = callBackUrl };
+                            var chargeResponse = TapPayment.CreateChargeRequest(tapChargeRequest, _config);
+                            if (chargeResponse != null)
+                            {
+                                var redirectUrl = string.Empty;
+                                if (chargeResponse.transaction != null &&
+                                    !string.IsNullOrEmpty(chargeResponse.transaction.url))
+                                    redirectUrl = chargeResponse.transaction.url;
+
+                                if (!string.IsNullOrEmpty(redirectUrl))
+                                {
+                                    var paymentDm = new PAYMENTS
+                                    {
+                                        Order_Id = orderDm.Order_Id,
+                                        Amount = netAmt,
+                                        Track_Id = chargeResponse.id,
+                                        Created_Datetime = StaticMethods.GetKuwaitTime(),
+                                        Comments = ""
+                                    };
+                                    orderService.CreatePayment(paymentDm);
+
+                                    Helpers.WriteToFile(_logPath, "Redirecting to :" + redirectUrl, true);
+                                    response.Payment_Link = redirectUrl;
+                                }
+                            }
+                        }
+
+                        response.OrderId = orderDm.Order_Id;
+                        response.Status = 0;
+                        response.Message = ServiceResponse.Success;
+                        await transaction.CommitAsync();
+                    }
+                    else
+                    {
+                        response.Status = 101;
+                        response.Message = "App User Not Found";
+                        return response;
                     }
                 }
             }
-
-            catch (Exception ex)
-            {
-                scope.Dispose();
-                response.Status = 1;
-                response.Message = ServiceResponse.ServerError;
-                Helpers.WriteToFile(_logPath, ex.ToString());
-            }
-
-            return response;
         }
+
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            response.Status = 1;
+            response.Message = ServiceResponse.ServerError;
+            Helpers.WriteToFile(_logPath, ex.ToString());
+        }
+
+        return response;
     }
 
     [Route("Order/{orderId}")]
@@ -2974,7 +3001,8 @@ public class WebApiController : ControllerBase
                                 Image_Url = currentevent.Image_URL ?? "",
                                 Brand_Name = lang.ToUpper() == "E"
                                     ? currentevent.Brand_Name_E ?? ""
-                                    : currentevent.Brand_Name_A ?? ""
+                                    : currentevent.Brand_Name_A ?? "",
+                                IsCustomizable = currentevent.IsCustomizable
                             };
                             response.Products.Add(eventsDto);
                         }

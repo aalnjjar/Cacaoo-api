@@ -2,16 +2,16 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class UserService
+public class UserService : IUserService
 {
-    private readonly AppDbContext context;
-    private readonly string logPath;
+    private readonly AppDbContext _context;
+    private readonly string _logPath;
 
     public UserService(AppDbContext appDbContext, string errorLogPath)
     {
-        context = appDbContext;
-        logPath = errorLogPath;
-        // context.UpdateEFCon();
+        _context = appDbContext;
+        _logPath = errorLogPath;
+        // _context.UpdateEFCon();
 
     }
     public SM_USERS? ValidateUser(string userName, string password)
@@ -19,7 +19,7 @@ public class UserService
         var userId = new SM_USERS();
         try
         {
-            userId = (from o in context.sm_users
+            userId = (from o in _context.sm_users
                 where o.User_Id == userName && o.Password == password
                 select o).FirstOrDefault();
 
@@ -28,7 +28,7 @@ public class UserService
 
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userId;
     }
@@ -39,14 +39,14 @@ public class UserService
         try
         {
 
-            username = (from o in context.sm_users
+            username = (from o in _context.sm_users
                 where o.User_Id.ToUpper() == userName.ToUpper()
                 select o).FirstOrDefault();
 
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return username;
     }
@@ -55,7 +55,7 @@ public class UserService
     //    var userList = new List<SP_GetUserList_Result>();
     //    try
     //    {
-    //        var query = (from o in context.sm_users
+    //        var query = (from o in _context.sm_users
     //                     select o).ToList();
 
     //        foreach (var smUser in query)
@@ -80,8 +80,8 @@ public class UserService
         var userList = new List<SM_USERS>();
         try
         {
-            var query = (from o in context.sm_users
-                from g in context.sm_user_groups
+            var query = (from o in _context.sm_users
+                from g in _context.sm_user_groups
                 where o.Group_Cd == g.Group_Cd
                 select new
                 {
@@ -101,7 +101,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userList;
     }
@@ -110,8 +110,8 @@ public class UserService
         var userList = new List<SM_USERS>();
         try
         {
-            var query = (from o in context.sm_users
-                from g in context.sm_user_groups
+            var query = (from o in _context.sm_users
+                from g in _context.sm_user_groups
                 where o.Group_Cd == g.Group_Cd && o.Group_Cd == 3
                 select new
                 {
@@ -131,7 +131,7 @@ public class UserService
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userList;
     }
@@ -140,14 +140,14 @@ public class UserService
         var userList = new SM_USERS();
         try
         {
-            userList = (from o in context.sm_users
+            userList = (from o in _context.sm_users
                 where o.User_Cd == userCd
                 select o).FirstOrDefault();
 
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userList;
     }
@@ -157,10 +157,10 @@ public class UserService
         var userMenu = new List<SM_MENU>();
         try
         {
-            userMenu = (from o in context.sm_menu
-                from u in context.sm_users
-                from ug in context.sm_user_groups
-                from ugr in context.sm_user_group_rights
+            userMenu = (from o in _context.sm_menu
+                from u in _context.sm_users
+                from ug in _context.sm_user_groups
+                from ugr in _context.sm_user_group_rights
                 where o.MenuId == ugr.Menu_Id && ugr.Group_Cd == ug.Group_Cd
                                               && ug.Group_Cd == u.Group_Cd && u.User_Cd == userId
                                               && ugr.AllowView && o.Show
@@ -169,7 +169,7 @@ public class UserService
         catch (Exception ex)
         {
 
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userMenu;
     }
@@ -179,10 +179,10 @@ public class UserService
         var userMenu = new List<SM_MENU>();
         try
         {
-            userMenu = (from o in context.sm_menu
-                from u in context.sm_users
-                from ug in context.sm_user_groups
-                from ugr in context.sm_user_group_rights
+            userMenu = (from o in _context.sm_menu
+                from u in _context.sm_users
+                from ug in _context.sm_user_groups
+                from ugr in _context.sm_user_group_rights
                 where o.MenuId == ugr.Menu_Id && ugr.Group_Cd == ug.Group_Cd
                                               && ug.Group_Cd == u.Group_Cd && u.User_Cd == userId
                                               && ugr.AllowEdit && o.Show
@@ -191,7 +191,7 @@ public class UserService
         catch (Exception ex)
         {
 
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userMenu;
     }
@@ -201,10 +201,10 @@ public class UserService
         var userMenu = new List<SM_MENU>();
         try
         {
-            userMenu = (from o in context.sm_menu
-                from u in context.sm_users
-                from ug in context.sm_user_groups
-                from ugr in context.sm_user_group_rights
+            userMenu = (from o in _context.sm_menu
+                from u in _context.sm_users
+                from ug in _context.sm_user_groups
+                from ugr in _context.sm_user_group_rights
                 where o.MenuId == ugr.Menu_Id && ugr.Group_Cd == ug.Group_Cd
                                               && ug.Group_Cd == u.Group_Cd && u.User_Cd == userId
                                               && ugr.AllowAdd && o.Show
@@ -213,7 +213,7 @@ public class UserService
         catch (Exception ex)
         {
 
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userMenu;
     }
@@ -223,10 +223,10 @@ public class UserService
         var userMenu = new List<SM_MENU>();
         try
         {
-            userMenu = (from o in context.sm_menu
-                from u in context.sm_users
-                from ug in context.sm_user_groups
-                from ugr in context.sm_user_group_rights
+            userMenu = (from o in _context.sm_menu
+                from u in _context.sm_users
+                from ug in _context.sm_user_groups
+                from ugr in _context.sm_user_group_rights
                 where o.MenuId == ugr.Menu_Id && ugr.Group_Cd == ug.Group_Cd
                                               && ug.Group_Cd == u.Group_Cd && u.User_Cd == userId
                                               && ugr.AllowDelete && o.Show
@@ -235,7 +235,7 @@ public class UserService
         catch (Exception ex)
         {
 
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userMenu;
     }
@@ -245,13 +245,13 @@ public class UserService
         var userMenu = new List<SM_MENU>();
         try
         {
-            userMenu = (from o in context.sm_menu
+            userMenu = (from o in _context.sm_menu
                 where o.Show
                 select o).ToList();
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userMenu;
     }
@@ -261,7 +261,7 @@ public class UserService
         {
             if (userDM.User_Cd != 0)
             {
-                var category = (from o in context.sm_users
+                var category = (from o in _context.sm_users
                     where o.User_Cd == userDM.User_Cd
                     select o).FirstOrDefault();
 
@@ -274,20 +274,20 @@ public class UserService
                     category.Comments = userDM.Comments;
                     category.User_Cd = userDM.User_Cd;
 
-                    context.SaveChanges();
+                    _context.SaveChanges();
                 }
             }
             else
             {
 
-                context.sm_users.Add(userDM);
-                context.SaveChanges();
+                _context.sm_users.Add(userDM);
+                _context.SaveChanges();
             }
 
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
 
 
@@ -299,14 +299,14 @@ public class UserService
         var userList = new List<SM_USER_GROUPS>();
         try
         {
-            userList = (from o in context.sm_user_groups
+            userList = (from o in _context.sm_user_groups
                 select o).ToList();
 
 
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userList;
     }
@@ -316,14 +316,14 @@ public class UserService
         var userList = new SM_USER_GROUPS();
         try
         {
-            userList = (from o in context.sm_user_groups
+            userList = (from o in _context.sm_user_groups
                 where o.Group_Cd == groupCd
                 select o).FirstOrDefault();
 
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
         return userList;
     }
@@ -332,8 +332,8 @@ public class UserService
     //    var userMenu = new List<SM_USER_GROUP_RIGHTS>();
     //    try
     //    {
-    //        var query = (from o in context.sm_user_group_rights
-    //                     from m in context.sm_menu
+    //        var query = (from o in _context.sm_user_group_rights
+    //                     from m in _context.sm_menu
     //                     where o.Group_Cd == groupId && o.Menu_Id == m.MenuId
     //                     select new
     //                     {
@@ -361,7 +361,7 @@ public class UserService
         try
         {
 
-            grouprights = (from o in context.sm_menu
+            grouprights = (from o in _context.sm_menu
                 where o.Show
                 select new GroupsRightsDTO
                 {
@@ -369,14 +369,14 @@ public class UserService
                     MenuName_En = o.MenuName_En
                 }).ToList();
 
-            var groupMenuRights = (from o in context.sm_user_group_rights
+            var groupMenuRights = (from o in _context.sm_user_group_rights
                 where o.Group_Cd == gruopId
                 select o).ToList();
 
             foreach (var location in grouprights)
             {
                 var locRight = (from o in groupMenuRights
-                    from g in context.sm_user_groups
+                    from g in _context.sm_user_groups
                     where o.Group_Cd == g.Group_Cd && o.Menu_Id == location.Menu_Id
                     select new
                     {
@@ -411,7 +411,7 @@ public class UserService
         {
             if (userDM.Group_Cd != 0)
             {
-                var category = (from o in context.sm_user_groups
+                var category = (from o in _context.sm_user_groups
                     where o.Group_Cd == userDM.Group_Cd
                     select o).FirstOrDefault();
 
@@ -422,19 +422,19 @@ public class UserService
                     category.Show = userDM.Show;
                     category.User_Date_Time = userDM.User_Date_Time;
 
-                    context.SaveChanges();
+                    _context.SaveChanges();
                 }
             }
             else
             {
 
-                context.sm_user_groups.Add(userDM);
-                context.SaveChanges();
+                _context.sm_user_groups.Add(userDM);
+                _context.SaveChanges();
             }
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
 
 
@@ -447,7 +447,7 @@ public class UserService
         {
             if (userDM.Right_Id != 0)
             {
-                var category = (from o in context.sm_user_group_rights
+                var category = (from o in _context.sm_user_group_rights
                     where o.Right_Id == userDM.Right_Id
                     select o).FirstOrDefault();
 
@@ -459,19 +459,19 @@ public class UserService
                     category.AllowDelete = userDM.AllowDelete;
                     category.User_Date_Time = userDM.User_Date_Time;
 
-                    context.SaveChanges();
+                    _context.SaveChanges();
                 }
             }
             else
             {
 
-                context.sm_user_group_rights.Add(userDM);
-                context.SaveChanges();
+                _context.sm_user_group_rights.Add(userDM);
+                _context.SaveChanges();
             }
         }
         catch (Exception ex)
         {
-            Helpers.WriteToFile(logPath, ex.ToString(), true);
+            Helpers.WriteToFile(_logPath, ex.ToString(), true);
         }
 
 
@@ -481,15 +481,15 @@ public class UserService
     {
         try
         {
-            var query = (from o in context.sm_user_group_rights
+            var query = (from o in _context.sm_user_group_rights
                 where o.Group_Cd == groupCd
                 select o).ToList();
 
             foreach (var userGroupRight in query)
             {
-                context.sm_user_group_rights.Remove(userGroupRight);
+                _context.sm_user_group_rights.Remove(userGroupRight);
             }
-            context.SaveChanges();
+            _context.SaveChanges();
             return true;
         }
         catch (Exception)

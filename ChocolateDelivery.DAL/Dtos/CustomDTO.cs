@@ -127,9 +127,12 @@ public class CateringCategoryDTO
 public class CateringOptionDTO
 {
     public long Cateroing_Product_Id { get; set; }
-    public string Option_Name { get; set; } = "";      
+    public string Option_Name { get; set; } = "";
+    public int Max { get; set; }
+    public int Min { get; set; }
 
 }
+
 public class CartResponse
 {
     public int Status { get; set; }
@@ -144,8 +147,8 @@ public class CartResponse
         Restaurant_Details = new RestaurantDTO();
         CartItems = new List<CartDTO>();
     }
-
 }
+
 public class CartDTO
 {
     public long Cart_Id { get; set; }
@@ -153,34 +156,38 @@ public class CartDTO
     public string Product_Name { get; set; } = "";
     public string Image_Url { get; set; } = "";
     public int? Qty { get; set; }
+    public string Message { get; set; }
+    public string Link { get; set; }
+
     public decimal? Rate { get; set; }
     public decimal? Amount { get; set; }
     public string Comments { get; set; } = "";
     public bool Is_Currently_Available { get; set; }
-      
+
     public List<ProductAddOnDTO> Product_AddOns { get; set; }
     public List<CartCateringProductsDTO> Catering_Products { get; set; }
 
     public CartDTO()
     {
-           
         Product_AddOns = new List<ProductAddOnDTO>();
         Catering_Products = new List<CartCateringProductsDTO>();
     }
-
 }
+
 public class ProductAddOnDTO
 {
-    public long Product_AddOn_Id { get; set; }      
+    public long Product_AddOn_Id { get; set; }
     public string Product_AddOn_Name { get; set; } = "";
     public decimal Product_AddOn_Price { get; set; }
 }
+
 public class CartCateringProductsDTO
 {
     public long Catering_Product_Id { get; set; }
     public string? Catering_Product { get; set; } = string.Empty;
     public int Qty { get; set; }
 }
+
 public class RestaurantDTO
 {
     public long Restaurant_Id { get; set; }
@@ -192,8 +199,8 @@ public class RestaurantDTO
     {
         Branches = new List<BranchDTO>();
     }
-
 }
+
 public class BranchDTO
 {
     public long Branch_Id { get; set; }

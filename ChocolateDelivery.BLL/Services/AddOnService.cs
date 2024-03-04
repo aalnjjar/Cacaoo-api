@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class AddOnService
+public class AddOnService : IAddOnService
 {
     private readonly AppDbContext _context;
 

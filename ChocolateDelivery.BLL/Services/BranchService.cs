@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class BranchService
+public class BranchService : IBranchService
 {
     private readonly AppDbContext _context;
 

@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class ListService
+public class ListService : IListService
 {
     private readonly AppDbContext _context;
     private readonly string _logPath;

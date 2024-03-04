@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace ChocolateDelivery.BLL;
 
-public class NotificationService
+public class NotificationService : INotificationService
 {
     private readonly AppDbContext _context;
     private readonly string _logPath;

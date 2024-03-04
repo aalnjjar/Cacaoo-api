@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class CateringCategoryService
+public class CateringCategoryService : ICateringCategoryService
 {
     private readonly AppDbContext _context;
 

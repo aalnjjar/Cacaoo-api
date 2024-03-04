@@ -2,7 +2,7 @@
 
 namespace ChocolateDelivery.BLL;
 
-public class CategoryService
+public class CategoryService : ICategoryService
 {
     private readonly AppDbContext _context;
       
@@ -147,6 +147,30 @@ public class CategoryService
         {
             categories = (from o in _context.sm_sub_categories
                 where o.Show && o.Category_Id == cat_id
+                orderby o.Sequence
+                select o).ToList();
+
+
+            foreach (var smSubCategories in categories)
+            {
+                smSubCategories.Leaf_Categories = GetLeafCategories(smSubCategories.Sub_Category_Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.ToString());
+        }
+        return categories;
+    }
+    
+    public List<SM_Leaf_Categories> GetLeafCategories(long cat_id)
+    {
+
+        var categories = new List<SM_Leaf_Categories>();
+        try
+        {
+            categories = (from o in _context.sm_leaf_categories
+                where o.Show && o.Sub_Category_Id == cat_id
                 orderby o.Sequence
                 select o).ToList();
 

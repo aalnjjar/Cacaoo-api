@@ -151,6 +151,12 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <div class="checkbox">
+                                        <input asp-for="IsCustomizable" />
+                                        @await Component.InvokeAsync("UCLabel", new { labelId = 354, cssClass = " mt-1" })
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="checkbox">
                                         <input asp-for="Is_Exclusive" />
                                         @await Component.InvokeAsync("UCLabel",new{labelId = 92,cssClass=" mt-1"})
                                     </div>

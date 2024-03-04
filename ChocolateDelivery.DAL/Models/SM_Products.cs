@@ -39,11 +39,14 @@ public class SM_Products
     public bool Is_Exclusive { get; set; }
     public bool Is_Catering { get; set; }
     public bool Is_Catering_Menu_Product { get; set; }
+    public int PreparationTime { get; set; }
+    public bool IsCustomizable { get; set; }
 
     [NotMapped] public IFormFile? Image_File { get; set; }
     [NotMapped] public long Category_Id { get; set; }
     [NotMapped] public string? Brand_Name_E { get; set; }
     [NotMapped] public string? Brand_Name_A { get; set; }
+    [NotMapped] public string? DeliveryTime { get; set; }
     [NotMapped] public bool Is_Favorite { get; set; }
     [NotMapped] public bool Is_Gift_Product { get; set; }
     [NotMapped] public string[] Occasion_Ids { get; set; } = Array.Empty<string>();

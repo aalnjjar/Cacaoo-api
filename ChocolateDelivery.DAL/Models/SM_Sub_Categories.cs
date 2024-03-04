@@ -24,4 +24,6 @@ public class SM_Sub_Categories
     
     [NotMapped]
     public IFormFile? Image_File { get; set; }
+    [NotMapped]
+    public List<SM_Leaf_Categories> Leaf_Categories { get; set; }
 }
