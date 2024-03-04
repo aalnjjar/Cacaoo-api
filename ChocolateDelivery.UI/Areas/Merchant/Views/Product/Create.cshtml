@@ -444,6 +444,8 @@
                                                                                 <th>Category</th>
                                                                                 <th>Product</th>
                                                                                 <th>Publish</th>
+                                                                                <th>Max</th>
+                                                                                <th>Min</th>
                                                                                 <th name="bstable-actions">Actions</th>
                                                                             </tr>
                                                                         </thead>
@@ -465,7 +467,9 @@
                                                                                         </td>
                                                                                         <td> @Model.SM_Product_Catering_Products[i].Category_Name</td>
                                                                                         <td> @Model.SM_Product_Catering_Products[i].Product_Name</td>
-                                                                                        <td> @Html.CheckBox("SM_Product_Catering_Products[" + @i + "].Publish", Model.SM_Product_Catering_Products[i].Publish)</td>
+                                                                                        <td> @Html.CheckBox("SM_Product_Catering_Products[" + @i + "].Publish", Model.SM_Product_Catering_Products[i].Publish)</td>   
+                                                                                        <td> @Html.TextBox("SM_Product_Catering_Products[" + @i + "].Max", Model.SM_Product_Catering_Products[i].Max)</td>
+                                                                                        <td> @Html.TextBox("SM_Product_Catering_Products[" + @i + "].Min", Model.SM_Product_Catering_Products[i].Min)</td>
                                                                                         <td name="bstable-actions">
                                                                                             <div class="btn-list">
 
@@ -789,7 +793,9 @@
                 var prod_id = $("#Category_Menu_Product_Id").val();
                 var prod_name = productData[0].text;
 
-                var appendRow = "<tr><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + "].Catering_Product_Id' name='SM_Product_Catering_Products[" + rowCount + "].Catering_Product_Id' value='0' /><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + "].Category_Id' name='SM_Product_Catering_Products[" + rowCount + "].Category_Id' value='" + cat_id + "' /><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + "].Child_Product_Id' name='SM_Product_Catering_Products[" + rowCount + "].Child_Product_Id' value='" + prod_id + "' /><td><label>" + (rowCount * 1 + 1) + "</label></td><td>" + cat_name + "</td><td>" + prod_name + "</td><td><input type='checkbox' name='SM_Product_Catering_Products[" + rowCount + "].Publish'  value='true' checked='checked' /></td><td name='bstable-actions'><div class='btn-list'><button id='bDel' type='button' onclick='deleteCateringProductRow(this,0)' class='btn btn-sm btn-danger'> <span class='fe fe-trash-2'> </span></button> </div></td></tr>";
+                var appendRow = "<tr><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + 
+                "].Catering_Product_Id' name='SM_Product_Catering_Products[" + rowCount +
+"].Catering_Product_Id' value='0' /><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + "].Category_Id' name='SM_Product_Catering_Products[" + rowCount + "].Category_Id' value='" + cat_id + "' /><input type='hidden' id='SM_Product_Catering_Products[" + rowCount + "].Child_Product_Id' name='SM_Product_Catering_Products[" + rowCount + "].Child_Product_Id' value='" + prod_id + "' /><td><label>" + (rowCount * 1 + 1) + "</label></td><td>" + cat_name + "</td><td>" + prod_name + "</td><td><input type='checkbox' name='SM_Product_Catering_Products[" + rowCount + "].Publish'  value='true' checked='checked' /></td><td><input type='number' name='SM_Product_Catering_Products[" + rowCount + "].Max' min='0' max='10' value='0'/></td> <td><input type='number' name='SM_Product_Catering_Products[" + rowCount + "].Min'  value='0' min='0' max='10'/></td> <td name='bstable-actions'><div class='btn-list'><button id='bDel' type='button' onclick='deleteCateringProductRow(this,0)' class='btn btn-sm btn-danger'> <span class='fe fe-trash-2'> </span></button> </div></td></tr>";
                 console.log("Append Row:" + appendRow);
                 $("#tblCateringProducts > tbody").append(appendRow);
                 $("#Catering_Category_Id").val("").trigger('change');
@@ -802,6 +808,8 @@
                     "Category_Name": cat_name,
                     "Product_Name": prod_name,
                     "Publish": true,
+                    "Max": 0,
+                    "Min": 0,
                     "Line_No": rowCount + 1
                 }
                 Product_AddOns.push(row);

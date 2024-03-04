@@ -20,7 +20,6 @@ public class DriverOrderDTO
     public string Customer_Note { get; set; } = string.Empty;
     public string Staff_Note { get; set; } = string.Empty;
 }
-
 public class GroupsRightsDTO
 {
     public long Right_Id { get; set; }
@@ -33,7 +32,6 @@ public class GroupsRightsDTO
     public bool AllowEdit { get; set; }
     public bool AllowDelete { get; set; }
 }
-
 public class CalenderDTO
 {
     public long Appointment_Detail_Id { get; set; }
@@ -48,32 +46,30 @@ public class CalenderDTO
     public string? URL { get; set; }
     public string Appointment_No { get; set; } = string.Empty;
 }
-
 public class Select2DTO
 {
     public string id { get; set; } = "";
     public string text { get; set; } = "";
-}
 
+}
 public class ProductRequest
 {
     public short Sub_Category_Id { get; set; }
     public string Like { get; set; } = "";
     public int Page_No { get; set; }
     public long Occasion_Id { get; set; }
-}
 
+}
 public class AppProducts
 {
     public long Total_Items { get; set; }
     public List<SM_Products> Items { get; set; }
-
     public AppProducts()
     {
         Items = new List<SM_Products>();
+
     }
 }
-
 public class ProductDetailResponse
 {
     public int Status { get; set; }
@@ -98,7 +94,6 @@ public class ProductDetailResponse
         Catering_Categories = new List<CateringCategoryDTO>();
     }
 }
-
 public class AddOnDTO
 {
     public long AddOn_Id { get; set; }
@@ -106,37 +101,36 @@ public class AddOnDTO
     public string AddOn_Desc { get; set; } = "";
     public int AddOn_Type { get; set; }
     public List<AddOnOptionDTO> Options { get; set; }
-
     public AddOnDTO()
     {
         Options = new List<AddOnOptionDTO>();
     }
 }
-
 public class AddOnOptionDTO
 {
     public long Option_Id { get; set; }
     public string Option_Name { get; set; } = "";
     public decimal Price { get; set; }
-}
 
+}
 public class CateringCategoryDTO
 {
     public long Category_Id { get; set; }
     public string Category_Name { get; set; } = "";
     public int Qty_To_Choose { get; set; }
     public List<CateringOptionDTO> Options { get; set; }
-
     public CateringCategoryDTO()
     {
         Options = new List<CateringOptionDTO>();
     }
 }
-
 public class CateringOptionDTO
 {
     public long Cateroing_Product_Id { get; set; }
     public string Option_Name { get; set; } = "";
+    public int Max { get; set; }
+    public int Min { get; set; }
+
 }
 
 public class CartResponse

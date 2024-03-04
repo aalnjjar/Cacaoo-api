@@ -540,6 +540,8 @@ public class ProductService : IProductService
                         {
                             Cateroing_Product_Id = o.Catering_Product_Id,
                             Option_Name = lang.ToUpper() == "E" ? p.Product_Name_E : p.Product_Name_A ?? "",
+                            Min = o.Min,
+                            Max = o.Max
 
                         }).ToList();
                     addOnDTO.Options.AddRange(options);

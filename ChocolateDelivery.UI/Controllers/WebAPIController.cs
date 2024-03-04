@@ -480,7 +480,16 @@ public class WebApiController : ControllerBase
                                     ? subCategory.Sub_Category_Name_A ?? subCategory.Sub_Category_Name_E
                                     : subCategory.Sub_Category_Name_E,
                                 Image_URL = subCategory.Image_URL ?? "",
-                                Background_Color = subCategory.Background_Color ?? ""
+                                Background_Color = subCategory.Background_Color ?? "",
+                                LeafCategories = subCategory.Leaf_Categories.Select(lc => new LeafCategoryDTO()
+                                {
+                                    Leaf_Category_Id = lc.Leaf_Category_Id,
+                                    Leaf_Category_Name = lang == "A"
+                                        ? lc.Leaf_Category_Name_A ?? lc.Leaf_Category_Name_E
+                                        : lc.Leaf_Category_Name_E,
+                                    Background_Color = lc.Background_Color,
+                                    Image_URL = lc.Image_URL
+                                }).ToList()
                             };
                             eventsDto.SubCategories.Add(subCategoryDto);
                         }
@@ -550,7 +559,16 @@ public class WebApiController : ControllerBase
                                 ? subCategory.Sub_Category_Name_A ?? subCategory.Sub_Category_Name_E
                                 : subCategory.Sub_Category_Name_E,
                             Image_URL = subCategory.Image_URL ?? "",
-                            Background_Color = subCategory.Background_Color ?? ""
+                            Background_Color = subCategory.Background_Color ?? "",
+                            LeafCategories = subCategory.Leaf_Categories.Select(lc => new LeafCategoryDTO()
+                            {
+                                Leaf_Category_Id = lc.Leaf_Category_Id,
+                                Leaf_Category_Name = lang == "A"
+                                    ? lc.Leaf_Category_Name_A ?? lc.Leaf_Category_Name_E
+                                    : lc.Leaf_Category_Name_E,
+                                Background_Color = lc.Background_Color,
+                                Image_URL = lc.Image_URL
+                            }).ToList()
                         };
                         response.SubCategories.Add(subCategoryDto);
                     }

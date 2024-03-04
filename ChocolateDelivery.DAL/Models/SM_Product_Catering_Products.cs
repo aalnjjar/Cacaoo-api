@@ -14,6 +14,8 @@ public class SM_Product_Catering_Products
     public bool Is_Deleted { get; set; }
     public int? Deleted_By { get; set; }
     public DateTime? Deleted_Datetime { get; set; }
+    public int Max { get; set; }
+    public int Min { get; set; }
     
     [NotMapped]
     public string Category_Name { get; set; } = "";
