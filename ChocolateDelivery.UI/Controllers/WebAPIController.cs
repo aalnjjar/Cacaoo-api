@@ -710,8 +710,8 @@ public class WebApiController : ControllerBase
 
                         var groupItems = groupBc.GetGroupDetails(group.Group_Id);
                         groupItems = (from o in groupItems
-                                      orderby o.Sequence
-                                      select o).ToList();
+                            orderby o.Sequence
+                            select o).ToList();
 
 
                         foreach (var currentevent in groupItems)
@@ -1330,6 +1330,8 @@ public class WebApiController : ControllerBase
                             App_User_Id = appUserDm.App_User_Id,
                             Product_Id = cartRequest.Product_Id,
                             Qty = cartRequest.Qty,
+                            Message = cartRequest.Message,
+                            Link = cartRequest.Link,
                             Created_Datetime = StaticMethods.GetKuwaitTime(),
                             Comments = cartRequest.Comments
                         };
@@ -2430,7 +2432,7 @@ public class WebApiController : ControllerBase
                                 //tapChargeRequest.source = new Source { id = "src_kw.knet" };
                                 source = new Source { id = paymentId },
                                 reference = new Reference
-                                { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
+                                    { transaction = orderDm.Order_Serial, order = orderDm.Order_Id.ToString() },
                                 receipt = new Receipt { email = true, sms = true }
                             };
                             var customer = new TapCustomer

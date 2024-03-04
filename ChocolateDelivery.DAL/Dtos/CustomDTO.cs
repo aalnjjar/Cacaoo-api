@@ -20,6 +20,7 @@ public class DriverOrderDTO
     public string Customer_Note { get; set; } = string.Empty;
     public string Staff_Note { get; set; } = string.Empty;
 }
+
 public class GroupsRightsDTO
 {
     public long Right_Id { get; set; }
@@ -32,6 +33,7 @@ public class GroupsRightsDTO
     public bool AllowEdit { get; set; }
     public bool AllowDelete { get; set; }
 }
+
 public class CalenderDTO
 {
     public long Appointment_Detail_Id { get; set; }
@@ -46,30 +48,32 @@ public class CalenderDTO
     public string? URL { get; set; }
     public string Appointment_No { get; set; } = string.Empty;
 }
+
 public class Select2DTO
 {
     public string id { get; set; } = "";
     public string text { get; set; } = "";
-
 }
+
 public class ProductRequest
 {
     public short Sub_Category_Id { get; set; }
     public string Like { get; set; } = "";
     public int Page_No { get; set; }
     public long Occasion_Id { get; set; }
-
 }
+
 public class AppProducts
 {
     public long Total_Items { get; set; }
     public List<SM_Products> Items { get; set; }
+
     public AppProducts()
     {
         Items = new List<SM_Products>();
-
     }
 }
+
 public class ProductDetailResponse
 {
     public int Status { get; set; }
@@ -94,6 +98,7 @@ public class ProductDetailResponse
         Catering_Categories = new List<CateringCategoryDTO>();
     }
 }
+
 public class AddOnDTO
 {
     public long AddOn_Id { get; set; }
@@ -101,35 +106,39 @@ public class AddOnDTO
     public string AddOn_Desc { get; set; } = "";
     public int AddOn_Type { get; set; }
     public List<AddOnOptionDTO> Options { get; set; }
+
     public AddOnDTO()
     {
         Options = new List<AddOnOptionDTO>();
     }
 }
+
 public class AddOnOptionDTO
 {
     public long Option_Id { get; set; }
     public string Option_Name { get; set; } = "";
     public decimal Price { get; set; }
-
 }
+
 public class CateringCategoryDTO
 {
     public long Category_Id { get; set; }
     public string Category_Name { get; set; } = "";
     public int Qty_To_Choose { get; set; }
     public List<CateringOptionDTO> Options { get; set; }
+
     public CateringCategoryDTO()
     {
         Options = new List<CateringOptionDTO>();
     }
 }
+
 public class CateringOptionDTO
 {
     public long Cateroing_Product_Id { get; set; }
-    public string Option_Name { get; set; } = "";      
-
+    public string Option_Name { get; set; } = "";
 }
+
 public class CartResponse
 {
     public int Status { get; set; }
@@ -144,8 +153,8 @@ public class CartResponse
         Restaurant_Details = new RestaurantDTO();
         CartItems = new List<CartDTO>();
     }
-
 }
+
 public class CartDTO
 {
     public long Cart_Id { get; set; }
@@ -153,34 +162,38 @@ public class CartDTO
     public string Product_Name { get; set; } = "";
     public string Image_Url { get; set; } = "";
     public int? Qty { get; set; }
+    public string Message { get; set; }
+    public string Link { get; set; }
+
     public decimal? Rate { get; set; }
     public decimal? Amount { get; set; }
     public string Comments { get; set; } = "";
     public bool Is_Currently_Available { get; set; }
-      
+
     public List<ProductAddOnDTO> Product_AddOns { get; set; }
     public List<CartCateringProductsDTO> Catering_Products { get; set; }
 
     public CartDTO()
     {
-           
         Product_AddOns = new List<ProductAddOnDTO>();
         Catering_Products = new List<CartCateringProductsDTO>();
     }
-
 }
+
 public class ProductAddOnDTO
 {
-    public long Product_AddOn_Id { get; set; }      
+    public long Product_AddOn_Id { get; set; }
     public string Product_AddOn_Name { get; set; } = "";
     public decimal Product_AddOn_Price { get; set; }
 }
+
 public class CartCateringProductsDTO
 {
     public long Catering_Product_Id { get; set; }
     public string? Catering_Product { get; set; } = string.Empty;
     public int Qty { get; set; }
 }
+
 public class RestaurantDTO
 {
     public long Restaurant_Id { get; set; }
@@ -192,8 +205,8 @@ public class RestaurantDTO
     {
         Branches = new List<BranchDTO>();
     }
-
 }
+
 public class BranchDTO
 {
     public long Branch_Id { get; set; }

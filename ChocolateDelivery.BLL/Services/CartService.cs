@@ -107,6 +107,8 @@ public class CartService : ICartService
                     Product_Name = lang.ToUpper() == "E" ? item.i.Product_Name_E : item.i.Product_Name_A ?? "",
                     Image_Url = item.i.Image_URL ?? "",
                     Qty = item.o.Qty,
+                    Message = item.o.Message,
+                    Link = item.o.Link,
                     Rate = item.i.Price,
                     Amount = item.o.Qty * item.i.Price,
                     Comments = item.o.Comments ?? "",
