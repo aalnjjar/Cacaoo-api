@@ -24,6 +24,7 @@
     <ItemGroup>
         <Folder Include="Areas\Merchant\Views\Shared\" />
         <Folder Include="wwwroot\assets\images\payment-methods\" />
+        <Folder Include="wwwroot\images\uploads\" />
     </ItemGroup>
 
     <ItemGroup>

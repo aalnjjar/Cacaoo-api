@@ -1260,7 +1260,7 @@ public class WebApiController : ControllerBase
 
     [Route("AddToCart")]
     [HttpPost]
-    public AddCartResponse AddToCart(CartRequest cartRequest)
+    public AddCartResponse AddToCart([FromForm] CartRequest cartRequest)
     {
         var securityKey = "";
         var response = new AddCartResponse();
@@ -1342,6 +1342,7 @@ public class WebApiController : ControllerBase
                             return response;
                         }
 
+
                         var cartDm = new TXN_Cart
                         {
                             Cart_Id = cartRequest.Cart_Id,
@@ -1349,10 +1350,15 @@ public class WebApiController : ControllerBase
                             Product_Id = cartRequest.Product_Id,
                             Qty = cartRequest.Qty,
                             Message = cartRequest.Message,
-                            Link = cartRequest.Link,
                             Created_Datetime = StaticMethods.GetKuwaitTime(),
                             Comments = cartRequest.Comments
                         };
+                        if (cartRequest.Image != null)
+                        {
+                            var imageUrl = SaveImage(cartRequest.Image);
+                            cartDm.Link = imageUrl;
+                        }
+
                         cartBc.AddtoCart(cartDm);
 
                         if (cartRequest.Cart_Id == 0)
@@ -1401,6 +1407,32 @@ public class WebApiController : ControllerBase
         }
 
         return response;
+    }
+
+
+    private string SaveImage(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/uploads");
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+        var fullPath = Path.Combine(savePath, fileName);
+
+        using (var stream = new FileStream(fullPath, FileMode.Create))
+        {
+            image.CopyTo(stream);
+        }
+
+        var request = HttpContext.Request;
+        var host = request.Host.ToUriComponent();
+        var scheme = request.Scheme;
+        var imageUrl = $"{scheme}://{host}/images/uploads/{fileName}";
+
+        return imageUrl;
     }
 
     [Route("Cart/{appUserId}")]

@@ -491,11 +491,11 @@ public class CartRequest
     public long Product_Id { get; set; }
     public int Qty { get; set; }
     public string? Message { get; set; }
-    public string? Link { get; set; }
+    public IFormFile? Image { get; set; }
 
     public string? Comments { get; set; } = string.Empty;
     public List<long> Product_AddOnIds { get; set; }
-    public List<CartCateringProductsDTO> Catering_Products { get; set; }
+    public List<CartCateringProductsDTO>? Catering_Products { get; set; }
 
     public CartRequest()
     {
