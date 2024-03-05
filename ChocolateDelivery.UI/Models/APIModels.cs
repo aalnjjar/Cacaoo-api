@@ -296,9 +296,7 @@ public class SubCategoryDTO
     public string Image_URL { get; set; } = "";
     public string Background_Color { get; set; } = "";
     public List<LeafCategoryDTO> LeafCategories { get; set; }
-    
 }
-
 
 public class LeafCategoryDTO
 {
@@ -492,8 +490,8 @@ public class CartRequest
     public string App_User_Id { get; set; } = string.Empty;
     public long Product_Id { get; set; }
     public int Qty { get; set; }
-    public string Message { get; set; }
-    public string Link { get; set; }
+    public string? Message { get; set; }
+    public string? Link { get; set; }
 
     public string? Comments { get; set; } = string.Empty;
     public List<long> Product_AddOnIds { get; set; }
