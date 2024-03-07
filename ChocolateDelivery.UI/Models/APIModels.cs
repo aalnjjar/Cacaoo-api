@@ -177,7 +177,9 @@ public class TimeFrameDTO
 public class InvoiceMediaRequest
 {
     public string Session_Id { get; set; } = "";
-    [FromForm(Name = "Files")] public List<IFormFile>? Files { get; set; }
+
+    [FromForm(Name = "Files")]
+    public List<IFormFile>? Files { get; set; }
 }
 
 public class InvoiceMediaResponse
@@ -233,9 +235,14 @@ public class UnreadAppointmentResponse
 
 public class TXN_APPOINTMENTS
 {
-    [NotMapped] public string Cust_Name { get; set; } = "";
-    [NotMapped] public string Cust_Mobile { get; set; } = "";
-    [NotMapped] public string Appointment_Time { get; set; } = "";
+    [NotMapped]
+    public string Cust_Name { get; set; } = "";
+
+    [NotMapped]
+    public string Cust_Mobile { get; set; } = "";
+
+    [NotMapped]
+    public string Appointment_Time { get; set; } = "";
 }
 
 public class MeasurementResponse
@@ -430,6 +437,7 @@ public class BrandDetailResponse
     public string Image_Url { get; set; } = "";
     public string Delivery_Time { get; set; } = "";
     public decimal Delivery_Charge { get; set; }
+    public RestaurantStatus? RestaurantStatus { get; set; }
     public List<BrandCategoryDTO> Categories { get; set; }
 
     public BrandDetailResponse()

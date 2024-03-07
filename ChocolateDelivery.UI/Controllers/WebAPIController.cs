@@ -995,6 +995,7 @@ public class WebApiController : ControllerBase
                         response.Image_Url = brandDm.Image_URL ?? "";
                         response.Delivery_Charge = brandDm.Delivery_Charge;
                         response.Delivery_Time = brandDm.Delivery_Time ?? "";
+                        response.RestaurantStatus = brandDm.RestaurantStatus;
                         var categories = brandService.GetBrandCategories(brandDm.Restaurant_Id);
                         if (lang == "A")
                         {
