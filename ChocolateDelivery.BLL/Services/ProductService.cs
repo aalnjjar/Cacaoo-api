@@ -189,7 +189,7 @@ public class ProductService : IProductService
                 prodDM.Brand_Name_E = product.b != null ? product.b.Brand_Name_E : "";
                 prodDM.Brand_Name_A = product.b != null ? product.b.Brand_Name_A : "";
                 prodDM.DeliveryTime = product.res.Delivery_Time;
-                prodDM.Brand_Id = product.o.Brand_Id;
+                prodDM.Brand_Id = product.b?.Brand_Id ?? 0;
                 appPosts.Items.Add(prodDM);
             }
         }
