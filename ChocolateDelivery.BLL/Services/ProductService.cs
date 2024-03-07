@@ -9,7 +9,6 @@ public class ProductService : IProductService
     public ProductService(AppDbContext benayaatEntities)
     {
         _context = benayaatEntities;
-
     }
 
     public SM_Products CreateProduct(SM_Products productDM)
@@ -40,6 +39,7 @@ public class ProductService : IProductService
                 {
                     query.Image_URL = productDM.Image_URL;
                 }
+
                 query.Comments = productDM.Comments;
                 query.Brand_Id = productDM.Brand_Id;
                 query.Is_Exclusive = productDM.Is_Exclusive;
@@ -48,6 +48,7 @@ public class ProductService : IProductService
             {
                 _context.sm_products.Add(productDM);
             }
+
             _context.SaveChanges();
         }
 
@@ -55,6 +56,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return productDM;
     }
 
@@ -73,14 +75,13 @@ public class ProductService : IProductService
                 query.Status_Id = productDM.Status_Id;
                 _context.SaveChanges();
             }
-
-
         }
 
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return productDM;
     }
 
@@ -89,16 +90,14 @@ public class ProductService : IProductService
         var area = new SM_Products();
         try
         {
-
-
             var query = (from o in _context.sm_products
-                join res in _context.sm_restaurants on o.Restaurant_Id equals res.Restaurant_Id 
+                join res in _context.sm_restaurants on o.Restaurant_Id equals res.Restaurant_Id
                 from sc in _context.sm_sub_categories
                 from c in _context.sm_categories
                 join f in _context.txn_favorite on o.Product_Id equals f.Product_Id into favorite
                 from f in favorite.Where(x => x.App_User_Id == app_user_id).DefaultIfEmpty()
                 where o.Product_Id == product_id && o.Sub_Category_Id == sc.Sub_Category_Id && sc.Category_Id == c.Category_Id
-                select new { o, sc, f, c , res}).FirstOrDefault();
+                select new { o, sc, f, c, res }).FirstOrDefault();
 
             if (query != null)
             {
@@ -113,6 +112,7 @@ public class ProductService : IProductService
                 {
                     area.Is_Favorite = true;
                 }
+
                 area.Occasion_Ids = GetAllProductOccasions(product_id).Select(x => x.Occasion_Id.ToString()).ToArray();
             }
         }
@@ -120,12 +120,12 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return area;
     }
 
     public AppProducts GetAppProducts(ProductRequest itemRequest)
     {
-
         var appPosts = new AppProducts();
         try
         {
@@ -137,12 +137,13 @@ public class ProductService : IProductService
                 where o.Show && o.Publish
                              && !o.Is_Catering_Menu_Product
                 orderby o.Sequence
-                select new { b, o , res}).ToList();
+                select new { b, o, res }).ToList();
 
             if (itemRequest.Sub_Category_Id != 0)
             {
                 query = query.Where(x => x.o.Sub_Category_Id == itemRequest.Sub_Category_Id).ToList();
             }
+
             if (!string.IsNullOrEmpty(itemRequest.Like))
             {
                 var likes = itemRequest.Like.Split(' ');
@@ -155,6 +156,7 @@ public class ProductService : IProductService
                     )).ToList();
                 }
             }
+
             if (itemRequest.Occasion_Id != 0)
             {
                 query = (from o in query
@@ -180,21 +182,22 @@ public class ProductService : IProductService
                     .Take(pageSize)
                     .ToList();
             }
+
             foreach (var product in query)
             {
                 var prodDM = product.o;
                 prodDM.Brand_Name_E = product.b != null ? product.b.Brand_Name_E : "";
                 prodDM.Brand_Name_A = product.b != null ? product.b.Brand_Name_A : "";
                 prodDM.DeliveryTime = product.res.Delivery_Time;
+                prodDM.Brand_Id = product.o.Brand_Id;
                 appPosts.Items.Add(prodDM);
             }
-
-
         }
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return appPosts;
     }
 
@@ -217,6 +220,7 @@ public class ProductService : IProductService
             {
                 _context.sm_product_addons.Add(invoiceDM);
             }
+
             _context.SaveChanges();
         }
 
@@ -224,11 +228,12 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return invoiceDM;
     }
+
     public List<SM_Product_AddOns> GetAllProductAddOns(long product_id)
     {
-
         var customer = new List<SM_Product_AddOns>();
         try
         {
@@ -251,6 +256,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
 
@@ -287,12 +293,12 @@ public class ProductService : IProductService
                     customer.Add(addOnDTO);
                 }
             }
-
         }
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
 
@@ -301,7 +307,6 @@ public class ProductService : IProductService
         var area = new SM_Product_AddOns();
         try
         {
-
             area = (from o in _context.sm_product_addons
                 where o.Product_AddOnId == product_addon_id && !o.Is_Deleted
                 select o).FirstOrDefault();
@@ -310,8 +315,10 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return area;
     }
+
     public bool DeleteProductAddOn(SM_Product_AddOns docDM)
     {
         try
@@ -326,13 +333,13 @@ public class ProductService : IProductService
                 detail.Deleted_Datetime = docDM.Deleted_Datetime;
                 _context.SaveChanges();
             }
-
         }
 
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return true;
     }
 
@@ -346,10 +353,12 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return response;
     }
 
     #region Occasions
+
     public SM_Product_Occasions CreateProductOccasion(SM_Product_Occasions invoiceDM)
     {
         try
@@ -360,12 +369,12 @@ public class ProductService : IProductService
 
             if (query != null)
             {
-
             }
             else
             {
                 _context.sm_product_occasions.Add(invoiceDM);
             }
+
             _context.SaveChanges();
         }
 
@@ -373,6 +382,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return invoiceDM;
     }
 
@@ -388,34 +398,33 @@ public class ProductService : IProductService
                 _context.sm_product_occasions.RemoveRange(detail);
                 _context.SaveChanges();
             }
-
         }
 
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return true;
     }
 
     public List<SM_Product_Occasions> GetAllProductOccasions(long product_id)
     {
-
         var customer = new List<SM_Product_Occasions>();
         try
         {
             customer = (from o in _context.sm_product_occasions
                 where o.Product_Id == product_id
                 select o).ToList();
-
-
         }
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
+
     #endregion
 
     #region Branches
@@ -436,6 +445,7 @@ public class ProductService : IProductService
             {
                 _context.sm_product_branches.Add(invoiceDM);
             }
+
             _context.SaveChanges();
         }
 
@@ -443,6 +453,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return invoiceDM;
     }
 
@@ -475,15 +486,15 @@ public class ProductService : IProductService
                 {
                     productBranchDM.Is_Available = true; // if not define explicitly we are assuming it is available
                 }
+
                 customer.Add(productBranchDM);
             }
-
-
         }
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
 
@@ -505,6 +516,7 @@ public class ProductService : IProductService
             {
                 _context.sm_product_catering_products.Add(invoiceDM);
             }
+
             _context.SaveChanges();
         }
 
@@ -512,8 +524,10 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return invoiceDM;
     }
+
     public List<CateringCategoryDTO> GetProductCateringProducts(long product_id, string lang = "E")
     {
         var customer = new List<CateringCategoryDTO>();
@@ -542,18 +556,17 @@ public class ProductService : IProductService
                             Option_Name = lang.ToUpper() == "E" ? p.Product_Name_E : p.Product_Name_A ?? "",
                             Min = o.Min,
                             Max = o.Max
-
                         }).ToList();
                     addOnDTO.Options.AddRange(options);
                     customer.Add(addOnDTO);
                 }
             }
-
         }
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
 
@@ -562,7 +575,6 @@ public class ProductService : IProductService
         var area = new SM_Catering_Categories();
         try
         {
-
             area = (from o in _context.sm_catering_categories
                 where o.Category_Id == category_id
                 select o).FirstOrDefault();
@@ -571,6 +583,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return area;
     }
 
@@ -579,7 +592,6 @@ public class ProductService : IProductService
         var area = new SM_Product_Catering_Products();
         try
         {
-
             area = (from o in _context.sm_product_catering_products
                 where o.Catering_Product_Id == catering_product_id && !o.Is_Deleted
                 select o).FirstOrDefault();
@@ -588,6 +600,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return area;
     }
 
@@ -605,19 +618,18 @@ public class ProductService : IProductService
                 detail.Deleted_Datetime = docDM.Deleted_Datetime;
                 _context.SaveChanges();
             }
-
         }
 
         catch (Exception ex)
         {
             throw new Exception(ex.ToString());
         }
+
         return true;
     }
 
     public List<SM_Product_Catering_Products> GetAllProductCateringProducts(long product_id)
     {
-
         var customer = new List<SM_Product_Catering_Products>();
         try
         {
@@ -641,6 +653,7 @@ public class ProductService : IProductService
         {
             throw new Exception(ex.ToString());
         }
+
         return customer;
     }
 }
