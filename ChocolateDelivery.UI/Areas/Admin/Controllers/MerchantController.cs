@@ -46,19 +46,9 @@ public class MerchantController : Controller
                 {
                     if (restaurant.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + restaurant.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        restaurant.Image_File.CopyToAsync(stream);
-
-                        restaurant.Image_URL = image_path_dir + fileName;
+                        var path = AmazonS3Service.UploadToS3(restaurant.Image_File, "category", fileName).Result;
+                        restaurant.Image_URL = path;
                     }
 
                     restaurant.Closing_Time = (DateTime.Parse(restaurant.Closing_Time_String)).TimeOfDay;

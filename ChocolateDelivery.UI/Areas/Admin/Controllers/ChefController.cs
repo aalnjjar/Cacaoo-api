@@ -22,8 +22,8 @@ public class ChefController : Controller
         this.iwebHostEnvironment = iwebHostEnvironment;
         logPath = Path.Combine(this.iwebHostEnvironment.WebRootPath, _config.GetValue<string>("ErrorFilePath")); // "Information"
         _chefService = new ChefService(context);
-
     }
+
     public IActionResult Create()
     {
         var list_id = Request.Query["List_Id"];
@@ -33,6 +33,7 @@ public class ChefController : Controller
         {
             type = Convert.ToInt16(Request.Query["Type"]);
         }
+
         ViewBag.Type = type;
         if (type == Chef_Types.CHEF)
         {
@@ -44,6 +45,7 @@ public class ChefController : Controller
             ViewBag.TypeName = "Boutique";
             ViewBag.Placeholder = "Enter Boutique Name";
         }
+
         return View();
     }
 
@@ -60,6 +62,7 @@ public class ChefController : Controller
             {
                 type = Convert.ToInt16(Request.Query["Type"]);
             }
+
             ViewBag.Type = type;
             if (type == Chef_Types.CHEF)
             {
@@ -71,6 +74,7 @@ public class ChefController : Controller
                 ViewBag.TypeName = "Boutique";
                 ViewBag.Placeholder = "Enter Boutique Name";
             }
+
             if (ModelState.IsValid)
             {
                 var user_cd = HttpContext.Session.GetInt32("UserCd");
@@ -78,19 +82,11 @@ public class ChefController : Controller
                 {
                     if (chef.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + chef.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        chef.Image_File.CopyToAsync(stream);
-
-                        chef.Image_URL = image_path_dir + fileName;
+                        var path = AmazonS3Service.UploadToS3(chef.Image_File, "category", fileName).Result;
+                        chef.Image_URL = path;
                     }
+
                     chef.Type_Id = type;
                     chef.Created_By = Convert.ToInt16(user_cd);
                     chef.Created_Datetime = StaticMethods.GetKuwaitTime();
@@ -108,13 +104,9 @@ public class ChefController : Controller
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
-
-
             }
             else
                 return View();
-
         }
         catch (Exception ex)
         {
@@ -122,8 +114,8 @@ public class ChefController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View();
         /*if (ModelState.IsValid)
         {
@@ -134,7 +126,6 @@ public class ChefController : Controller
         }
         else
             return View();*/
-
     }
 
     public IActionResult Update(string Id)
@@ -148,6 +139,7 @@ public class ChefController : Controller
             {
                 type = Convert.ToInt16(Request.Query["Type"]);
             }
+
             ViewBag.Type = type;
             if (type == Chef_Types.CHEF)
             {
@@ -159,6 +151,7 @@ public class ChefController : Controller
                 ViewBag.TypeName = "Boutique";
                 ViewBag.Placeholder = "Enter Boutique Name";
             }
+
             var decryptedId = Convert.ToInt32(StaticMethods.GetDecrptedString(Id));
             var areaexist = _chefService.GetChef(decryptedId);
             if (areaexist != null && areaexist.Chef_Id != 0)
@@ -169,7 +162,6 @@ public class ChefController : Controller
             {
                 ModelState.AddModelError("name", "Chef not exist");
             }
-
         }
         catch (Exception ex)
         {
@@ -177,8 +169,8 @@ public class ChefController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -194,6 +186,7 @@ public class ChefController : Controller
             {
                 type = Convert.ToInt16(Request.Query["Type"]);
             }
+
             ViewBag.Type = type;
             if (type == Chef_Types.CHEF)
             {
@@ -205,31 +198,23 @@ public class ChefController : Controller
                 ViewBag.TypeName = "Boutique";
                 ViewBag.Placeholder = "Enter Boutique Name";
             }
+
             if (ModelState.IsValid)
             {
                 var decryptedId = Convert.ToInt32(StaticMethods.GetDecrptedString(Id));
                 var areaDM = _chefService.GetChef(decryptedId);
                 if (areaDM != null && areaDM.Chef_Id != 0)
                 {
-
                     var user_cd = HttpContext.Session.GetInt32("UserCd");
                     if (user_cd != null)
                     {
                         if (chef.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + chef.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            chef.Image_File.CopyToAsync(stream);
-
-                            chef.Image_URL = image_path_dir + fileName;
+                            var path = AmazonS3Service.UploadToS3(chef.Image_File, "category", fileName).Result;
+                            chef.Image_URL = path;
                         }
+
                         chef.Chef_Id = decryptedId;
                         chef.Updated_By = Convert.ToInt16(user_cd);
                         chef.Updated_Datetime = StaticMethods.GetKuwaitTime();
@@ -247,7 +232,6 @@ public class ChefController : Controller
                     {
                         return RedirectToAction("Index", "Login");
                     }
-
                 }
                 else
                 {
@@ -259,8 +243,6 @@ public class ChefController : Controller
             {
                 return View("Create", chef);
             }
-
-
         }
         catch (Exception ex)
         {
@@ -268,8 +250,8 @@ public class ChefController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -290,7 +272,6 @@ public class ChefController : Controller
                 response.Status = 101;
                 response.Message = "Chef Product Not found";
             }
-               
         }
         catch (Exception ex)
         {
