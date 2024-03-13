@@ -1,9 +1,10 @@
 ﻿using ChocolateDelivery.BLL;
 using ChocolateDelivery.DAL;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
 using System.Data;
 using System.Globalization;
+using System.Text.RegularExpressions;
+using Npgsql;
 
 namespace ChocolateDelivery.UI.Areas.Admin.Controllers;
 
@@ -246,15 +247,15 @@ public class ListController : Controller
                 if (findDTO.Is_StoredProcedure == true)
                 {
 
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(findDTO.StoredProcedure_Name, con))
+                        using (var cmd = new NpgsqlCommand(findDTO.StoredProcedure_Name, con))
                         {
                             if (findDTO.Command_Timeout != null)
                             {
                                 cmd.CommandTimeout = (int)findDTO.Command_Timeout;
                             }
-                            using (var da = new MySqlDataAdapter(cmd))
+                            using (var da = new NpgsqlDataAdapter(cmd))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -277,12 +278,12 @@ public class ListController : Controller
                 }
                 else
                 {
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(selectstmt))
+                        using (var cmd = new NpgsqlCommand(selectstmt.ConvertToPgsqlQuery()))
                         {
                             cmd.Connection = con;
-                            using (var sda = new MySqlDataAdapter(cmd))
+                            using (var sda = new NpgsqlDataAdapter(cmd))
                             {
                                 sda.Fill(dt);
                             }

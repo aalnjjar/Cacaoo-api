@@ -5,11 +5,11 @@ using ChocolateDelivery.UI.Models;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
-using MySqlConnector;
 using Newtonsoft.Json;
 using System.Data;
 using System.Globalization;
 using System.Transactions;
+using Npgsql;
 
 //using static System.Net.Mime.MediaTypeNames;
 
@@ -2420,12 +2420,12 @@ public class WebApiController : ControllerBase
 
                             var connectionString =
                                 _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                            using (var con = new MySqlConnection(connectionString))
+                            using (var con = new NpgsqlConnection(connectionString))
                             {
                                 con.Open();
-                                using (var cmd = new MySqlCommand("InsertNotifications", con))
+                                using (var cmd = new NpgsqlCommand("InsertNotifications", con))
                                 {
-                                    using (new MySqlDataAdapter(cmd))
+                                    using (new NpgsqlDataAdapter(cmd))
                                     {
                                         cmd.CommandType = CommandType.StoredProcedure;
                                         cmd.Parameters.AddWithValue("@Campaign_Id", campaignDm.Campaign_Id);
@@ -3545,12 +3545,12 @@ public class WebApiController : ControllerBase
 
                                     var connectionString =
                                         _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                                    using (var con = new MySqlConnection(connectionString))
+                                    using (var con = new NpgsqlConnection(connectionString))
                                     {
                                         con.Open();
-                                        using (var cmd = new MySqlCommand("UpdateRedeemPoints", con))
+                                        using (var cmd = new NpgsqlCommand("UpdateRedeemPoints", con))
                                         {
-                                            using (new MySqlDataAdapter(cmd))
+                                            using (new NpgsqlDataAdapter(cmd))
                                             {
                                                 cmd.CommandType = CommandType.StoredProcedure;
                                                 cmd.Parameters.AddWithValue("@App_User_Id", orderDm.App_User_Id);
@@ -3683,12 +3683,12 @@ public class WebApiController : ControllerBase
 
                                     var connectionString =
                                         _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                                    using (var con = new MySqlConnection(connectionString))
+                                    using (var con = new NpgsqlConnection(connectionString))
                                     {
                                         con.Open();
-                                        using (var cmd = new MySqlCommand("UpdateRedeemPoints", con))
+                                        using (var cmd = new NpgsqlCommand("UpdateRedeemPoints", con))
                                         {
-                                            using (new MySqlDataAdapter(cmd))
+                                            using (new NpgsqlDataAdapter(cmd))
                                             {
                                                 cmd.CommandType = CommandType.StoredProcedure;
                                                 cmd.Parameters.AddWithValue("@App_User_Id", orderDm.App_User_Id);
@@ -4356,12 +4356,12 @@ public class WebApiController : ControllerBase
 
                                     var connectionString =
                                         _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                                    using (var con = new MySqlConnection(connectionString))
+                                    using (var con = new NpgsqlConnection(connectionString))
                                     {
                                         con.Open();
-                                        using (var cmd = new MySqlCommand("SetProductRating", con))
+                                        using (var cmd = new NpgsqlCommand("SetProductRating", con))
                                         {
-                                            using (new MySqlDataAdapter(cmd))
+                                            using (new NpgsqlDataAdapter(cmd))
                                             {
                                                 cmd.CommandType = CommandType.StoredProcedure;
                                                 cmd.Parameters.AddWithValue("@Prod_Id", orderDetailDm.Product_Id);
@@ -4786,4 +4786,11 @@ public class WebApiController : ControllerBase
     }
 
     #endregion
+
+    [HttpPost("test-upload")]
+    public async Task<IActionResult> UploadFile([FromForm] IFormFile file)
+    {
+        var name = await AmazonS3Service.UploadToS3(file);
+        return Ok(name);
+    }
 }
