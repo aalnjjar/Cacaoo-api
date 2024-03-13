@@ -65,18 +65,11 @@ public class ProductController : Controller
                 {
                     if (product.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + product.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        product.Image_File.CopyToAsync(stream);
+                        
+                        var path = AmazonS3Service.UploadToS3(product.Image_File, "Products", fileName).Result;
 
-                        product.Image_URL = image_path_dir + fileName;
+                        product.Image_URL = path;
                     }
                     product.Main_Category_Id = 1;
                     product.Product_Type_Id = 1;
@@ -198,18 +191,11 @@ public class ProductController : Controller
                     {
                         if (product.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + product.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            product.Image_File.CopyToAsync(stream);
+                        
+                            var path = AmazonS3Service.UploadToS3(product.Image_File, "Products", fileName).Result;
 
-                            product.Image_URL = image_path_dir + fileName;
+                            product.Image_URL = path;
                         }
                         product.Publish = areaDM.Publish; // we will keep `Publish` flag as it is as it will only updated by admin
                         product.Is_Exclusive = areaDM.Is_Exclusive; // we will keep `Is_Exclusive` flag as it is as it will only updated by admin

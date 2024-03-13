@@ -280,7 +280,7 @@ public class ListController : Controller
                 {
                     using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new NpgsqlCommand(selectstmt))
+                        using (var cmd = new NpgsqlCommand(selectstmt.ConvertToPgsqlQuery()))
                         {
                             cmd.Connection = con;
                             using (var sda = new NpgsqlDataAdapter(cmd))
