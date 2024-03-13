@@ -26,8 +26,8 @@ public class ProductController : Controller
         logPath = Path.Combine(this.iwebHostEnvironment.WebRootPath, _config.GetValue<string>("ErrorFilePath")); // "Information"
         _productService = new ProductService(context);
         _subCategoryService = new SubCategoryService(context);
-
     }
+
     public IActionResult Create()
     {
         var list_id = Request.Query["List_Id"];
@@ -51,22 +51,14 @@ public class ProductController : Controller
                 {
                     if (product.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + product.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        product.Image_File.CopyToAsync(stream);
-
-                        product.Image_URL = image_path_dir + fileName;
+                        var path = AmazonS3Service.UploadToS3(product.Image_File, "category", fileName).Result;
+                        product.Image_URL = path;
                     }
+
                     product.Main_Category_Id = 1;
                     product.Product_Type_Id = 1;
-                        
+                    product.Brand_Id = product.Brand_Id;
                     product.Status_Id = 1;
                     product.Created_By = Convert.ToInt16(user_cd);
                     product.Created_Datetime = StaticMethods.GetKuwaitTime();
@@ -78,11 +70,13 @@ public class ProductController : Controller
                         detail.Product_Id = product.Product_Id;
                         _productService.CreateProductAddOn(detail);
                     }
+
                     foreach (var detail in product.SM_Product_Branches)
                     {
                         detail.Product_Id = product.Product_Id;
                         _productService.CreateProductBranch(detail);
                     }
+
                     foreach (var occasion_id in product.Occasion_Ids)
                     {
                         var occasionDM = new SM_Product_Occasions
@@ -92,6 +86,7 @@ public class ProductController : Controller
                         };
                         _productService.CreateProductOccasion(occasionDM);
                     }
+
                     return Redirect("/Merchant/List/" + list_id);
                 }
                 else
@@ -99,13 +94,9 @@ public class ProductController : Controller
                     Helpers.WriteToFile(logPath, "Getting user id null while creating product", true);
                     return RedirectToAction("Index", "Login");
                 }
-
-
-
             }
             else
                 return View();
-
         }
         catch (Exception ex)
         {
@@ -113,8 +104,8 @@ public class ProductController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View();
         /*if (ModelState.IsValid)
         {
@@ -125,7 +116,6 @@ public class ProductController : Controller
         }
         else
             return View();*/
-
     }
 
     public IActionResult Update(string Id)
@@ -146,7 +136,6 @@ public class ProductController : Controller
             {
                 ModelState.AddModelError("name", "Product not exist");
             }
-
         }
         catch (Exception ex)
         {
@@ -154,8 +143,8 @@ public class ProductController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -172,27 +161,19 @@ public class ProductController : Controller
                 var areaDM = _productService.GetProduct(decryptedId);
                 if (areaDM != null && areaDM.Product_Id != 0)
                 {
-
                     var user_cd = HttpContext.Session.GetInt32("UserCd");
                     if (user_cd != null)
                     {
                         if (product.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + product.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            product.Image_File.CopyToAsync(stream);
-
-                            product.Image_URL = image_path_dir + fileName;
+                            var path = AmazonS3Service.UploadToS3(product.Image_File, "category", fileName).Result;
+                            product.Image_URL = path;
                         }
+
                         product.Show = areaDM.Show; // we will keep `Show` flag as it is as it will only updated by vendor
                         product.Product_Id = decryptedId;
+                        product.Brand_Id = product.Brand_Id;
                         product.Updated_By = Convert.ToInt16(user_cd);
                         product.Updated_Datetime = StaticMethods.GetKuwaitTime();
                         _productService.CreateProduct(product);
@@ -201,12 +182,14 @@ public class ProductController : Controller
                             detail.Product_Id = product.Product_Id;
                             _productService.CreateProductAddOn(detail);
                         }
+
                         _productService.CreateProduct(product);
                         foreach (var detail in product.SM_Product_Branches)
                         {
                             detail.Product_Id = product.Product_Id;
                             _productService.CreateProductBranch(detail);
                         }
+
                         _productService.DeleteProductOccasions(product.Product_Id);
                         foreach (var occasion_id in product.Occasion_Ids)
                         {
@@ -217,13 +200,13 @@ public class ProductController : Controller
                             };
                             _productService.CreateProductOccasion(occasionDM);
                         }
+
                         return Redirect("/Merchant/List/" + list_id);
                     }
                     else
                     {
                         return RedirectToAction("Index", "Login");
                     }
-
                 }
                 else
                 {
@@ -235,8 +218,6 @@ public class ProductController : Controller
             {
                 return View("Create", product);
             }
-
-
         }
         catch (Exception ex)
         {
@@ -244,8 +225,8 @@ public class ProductController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -271,7 +252,6 @@ public class ProductController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
     }
 
@@ -281,7 +261,6 @@ public class ProductController : Controller
         var response = new AddOnDeleteResponse();
         try
         {
-
             var detailDM = _productService.GetProductAddOn(request.Detail_Id);
             if (detailDM != null)
             {
@@ -304,6 +283,4 @@ public class ProductController : Controller
 
         return Json(response);
     }
-
-       
 }

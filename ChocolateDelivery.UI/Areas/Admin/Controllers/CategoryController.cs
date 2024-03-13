@@ -21,8 +21,8 @@ public class CategoryController : Controller
         this.iwebHostEnvironment = iwebHostEnvironment;
         logPath = Path.Combine(this.iwebHostEnvironment.WebRootPath, _config.GetValue<string>("ErrorFilePath")); // "Information"
         _categoryService = new CategoryService(context);
-
     }
+
     public IActionResult Create()
     {
         var list_id = Request.Query["List_Id"];
@@ -40,26 +40,17 @@ public class CategoryController : Controller
             ViewBag.List_Id = list_id;
             if (ModelState.IsValid)
             {
-
-
                 var user_cd = HttpContext.Session.GetInt32("UserCd");
                 if (user_cd != null)
                 {
                     if (category.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + category.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath  = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        category.Image_File.CopyToAsync(stream);
+                        var path = AmazonS3Service.UploadToS3(category.Image_File, "category", fileName).Result;
 
-                        category.Image_URL = image_path_dir + fileName;
+                        category.Image_URL = path;
                     }
+
                     category.Created_By = Convert.ToInt16(user_cd);
                     category.Created_Datetime = StaticMethods.GetKuwaitTime();
                     _categoryService.CreateCategory(category);
@@ -69,13 +60,9 @@ public class CategoryController : Controller
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
-
-
             }
             else
                 return View();
-
         }
         catch (Exception ex)
         {
@@ -83,8 +70,8 @@ public class CategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View();
         /*if (ModelState.IsValid)
         {
@@ -95,7 +82,6 @@ public class CategoryController : Controller
         }
         else
             return View();*/
-
     }
 
     public IActionResult Update(string Id)
@@ -114,7 +100,6 @@ public class CategoryController : Controller
             {
                 ModelState.AddModelError("name", "Category not exist");
             }
-
         }
         catch (Exception ex)
         {
@@ -122,8 +107,8 @@ public class CategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -140,25 +125,17 @@ public class CategoryController : Controller
                 var areaDM = _categoryService.GetCategory(decryptedId);
                 if (areaDM != null && areaDM.Category_Id != 0)
                 {
-
                     var user_cd = HttpContext.Session.GetInt32("UserCd");
                     if (user_cd != null)
                     {
                         if (category.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + category.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            category.Image_File.CopyToAsync(stream);
+                            var path = AmazonS3Service.UploadToS3(category.Image_File, "category", fileName).Result;
 
-                            category.Image_URL = image_path_dir + fileName;
+                            category.Image_URL = path;
                         }
+
                         category.Category_Id = decryptedId;
                         category.Updated_By = Convert.ToInt16(user_cd);
                         category.Updated_Datetime = StaticMethods.GetKuwaitTime();
@@ -169,7 +146,6 @@ public class CategoryController : Controller
                     {
                         return RedirectToAction("Index", "Login");
                     }
-
                 }
                 else
                 {
@@ -181,8 +157,6 @@ public class CategoryController : Controller
             {
                 return View("Create", category);
             }
-
-
         }
         catch (Exception ex)
         {
@@ -190,8 +164,8 @@ public class CategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 }

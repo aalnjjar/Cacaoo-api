@@ -10,7 +10,9 @@ public class AppDbContext : DbContext
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-
+        // optionsBuilder.EnableSensitiveDataLogging()
+        //     .LogTo(Console.WriteLine);
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -21,8 +21,8 @@ public class SubCategoryController : Controller
         this.iwebHostEnvironment = iwebHostEnvironment;
         logPath = Path.Combine(this.iwebHostEnvironment.WebRootPath, _config.GetValue<string>("ErrorFilePath")); // "Information"
         _subcategoryService = new SubCategoryService(context);
-
     }
+
     public IActionResult Create()
     {
         var list_id = Request.Query["List_Id"];
@@ -40,26 +40,16 @@ public class SubCategoryController : Controller
             ViewBag.List_Id = list_id;
             if (ModelState.IsValid)
             {
-
-
                 var user_cd = HttpContext.Session.GetInt32("UserCd");
                 if (user_cd != null)
                 {
                     if (subcategory.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/subcategories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + subcategory.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        subcategory.Image_File.CopyToAsync(stream);
-
-                        subcategory.Image_URL = image_path_dir + fileName;
+                        var path = AmazonS3Service.UploadToS3(subcategory.Image_File, "category", fileName).Result;
+                        subcategory.Image_URL = path;
                     }
+
                     subcategory.Created_By = Convert.ToInt16(user_cd);
                     subcategory.Created_Datetime = StaticMethods.GetKuwaitTime();
                     _subcategoryService.CreateSubCategory(subcategory);
@@ -69,13 +59,9 @@ public class SubCategoryController : Controller
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
-
-
             }
             else
                 return View();
-
         }
         catch (Exception ex)
         {
@@ -83,8 +69,8 @@ public class SubCategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View();
         /*if (ModelState.IsValid)
         {
@@ -95,7 +81,6 @@ public class SubCategoryController : Controller
         }
         else
             return View();*/
-
     }
 
     public IActionResult Update(string Id)
@@ -114,7 +99,6 @@ public class SubCategoryController : Controller
             {
                 ModelState.AddModelError("name", "SubCategory not exist");
             }
-
         }
         catch (Exception ex)
         {
@@ -122,8 +106,8 @@ public class SubCategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -140,25 +124,16 @@ public class SubCategoryController : Controller
                 var areaDM = _subcategoryService.GetSubCategory(decryptedId);
                 if (areaDM != null && areaDM.Sub_Category_Id != 0)
                 {
-
                     var user_cd = HttpContext.Session.GetInt32("UserCd");
                     if (user_cd != null)
                     {
                         if (subcategory.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/subcategories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + subcategory.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            subcategory.Image_File.CopyToAsync(stream);
-
-                            subcategory.Image_URL = image_path_dir + fileName;
+                            var path = AmazonS3Service.UploadToS3(subcategory.Image_File, "category", fileName).Result;
+                            subcategory.Image_URL = path;
                         }
+
                         subcategory.Sub_Category_Id = decryptedId;
                         subcategory.Updated_By = Convert.ToInt16(user_cd);
                         subcategory.Updated_Datetime = StaticMethods.GetKuwaitTime();
@@ -169,7 +144,6 @@ public class SubCategoryController : Controller
                     {
                         return RedirectToAction("Index", "Login");
                     }
-
                 }
                 else
                 {
@@ -181,8 +155,6 @@ public class SubCategoryController : Controller
             {
                 return View("Create", subcategory);
             }
-
-
         }
         catch (Exception ex)
         {
@@ -190,8 +162,8 @@ public class SubCategoryController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 }

@@ -40,25 +40,16 @@ public class AddOnController : Controller
             ViewBag.List_Id = list_id;
             if (ModelState.IsValid)
             {
-
-
                 var vendor_id = HttpContext.Session.GetInt32("VendorId");
                 if (vendor_id != null)
                 {
                     if (brand.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + brand.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        brand.Image_File.CopyToAsync(stream);
 
-                        brand.Image_URL = image_path_dir + fileName;
+                        var path =  AmazonS3Service.UploadToS3(brand.Image_File, "AddOns", fileName).Result;
+
+                        brand.Image_URL = path;
                     }
                     brand.Restaurant_Id = Convert.ToInt32(vendor_id);
                     brand.Created_By = Convert.ToInt16(vendor_id);
@@ -70,8 +61,6 @@ public class AddOnController : Controller
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
-
 
             }
             else
@@ -147,18 +136,11 @@ public class AddOnController : Controller
                     {
                         if (brand.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + brand.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            brand.Image_File.CopyToAsync(stream);
-
-                            brand.Image_URL = image_path_dir + fileName;
+                            
+                            var path = AmazonS3Service.UploadToS3(brand.Image_File, "AddOns", fileName).Result;
+                           
+                            brand.Image_URL = path;
                         }
                         brand.AddOn_Id = decryptedId;
                         brand.Updated_By = Convert.ToInt16(vendor_id);

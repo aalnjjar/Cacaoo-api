@@ -3,12 +3,13 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
+        <UserSecretsId>b1e243d5-9198-46e5-a60c-25db9ab3f670</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" Version="3.7.305.31" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-        <PackageReference Include="MySqlConnector" Version="2.2.7" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="RestSharp" Version="110.2.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />

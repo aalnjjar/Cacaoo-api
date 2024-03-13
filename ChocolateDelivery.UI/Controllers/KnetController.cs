@@ -4,9 +4,9 @@ using ChocolateDelivery.UI.CustomFilters;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
-using MySqlConnector;
 using Newtonsoft.Json;
 using System.Data;
+using Npgsql;
 
 namespace ChocolateDelivery.UI.Controllers;
 
@@ -123,12 +123,12 @@ public class KnetController : Controller
                                     notificationService.CreatePushCampaign(campaignDm);
 
                                     var connectionString = _config.GetValue<string>("ConnectionStrings:DefaultConnection");
-                                    using (var con = new MySqlConnection(connectionString))
+                                    using (var con = new NpgsqlConnection(connectionString))
                                     {
                                         con.Open();
-                                        using (var cmd = new MySqlCommand("InsertNotifications", con))
+                                        using (var cmd = new NpgsqlCommand("InsertNotifications", con))
                                         {
-                                            using (new MySqlDataAdapter(cmd))
+                                            using (new NpgsqlDataAdapter(cmd))
                                             {
                                                 cmd.CommandType = CommandType.StoredProcedure;
                                                 cmd.Parameters.AddWithValue("@Campaign_Id", campaignDm.Campaign_Id);

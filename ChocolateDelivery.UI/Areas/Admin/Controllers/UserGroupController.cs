@@ -22,6 +22,7 @@ public class UserGroupController : Controller
         logPath = Path.Combine(this.iwebHostEnvironment.WebRootPath, _config.GetValue<string>("ErrorFilePath")); // "Information"
         _userService = new UserService(context, logPath);
     }
+
     public IActionResult Create()
     {
         var list_id = Request.Query["List_Id"];
@@ -42,6 +43,7 @@ public class UserGroupController : Controller
                 AllowDelete = false
             });
         }
+
         userGroup.SM_USER_GROUP_RIGHTS = userGroupRights;
 
         return View(userGroup);
@@ -57,7 +59,6 @@ public class UserGroupController : Controller
             ViewBag.List_Id = list_id;
             if (ModelState.IsValid)
             {
-
                 var user_cd = HttpContext.Session.GetInt32("UserCd");
                 if (user_cd != null)
                 {
@@ -73,19 +74,16 @@ public class UserGroupController : Controller
                             _userService.CreateUserGroupRight(right);
                         }
                     }
+
                     return Redirect("/List/" + list_id);
                 }
                 else
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
-
-
             }
             else
                 return View("Create", group);
-
         }
         catch (Exception ex)
         {
@@ -93,8 +91,8 @@ public class UserGroupController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create", group);
         /*if (ModelState.IsValid)
         {
@@ -105,7 +103,6 @@ public class UserGroupController : Controller
         }
         else
             return View();*/
-
     }
 
     public IActionResult Update(string Id)
@@ -133,6 +130,7 @@ public class UserGroupController : Controller
                         AllowDelete = smMenu.AllowDelete,
                     });
                 }
+
                 areaexist.SM_USER_GROUP_RIGHTS = userGroupRights;
                 return View("Create", areaexist);
             }
@@ -140,7 +138,6 @@ public class UserGroupController : Controller
             {
                 ModelState.AddModelError("name", "Group not exist");
             }
-
         }
         catch (Exception ex)
         {
@@ -148,8 +145,8 @@ public class UserGroupController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create");
     }
 
@@ -178,8 +175,8 @@ public class UserGroupController : Controller
                             _userService.CreateUserGroupRight(right);
                         }
                     }
-                    return Redirect("/List/" + list_id);
 
+                    return Redirect("/List/" + list_id);
                 }
                 else
                 {
@@ -191,8 +188,6 @@ public class UserGroupController : Controller
             {
                 return View("Create", group);
             }
-
-
         }
         catch (Exception ex)
         {
@@ -200,8 +195,8 @@ public class UserGroupController : Controller
              lblError.Text = "Invalid username or password";*/
             ModelState.AddModelError("name", "Due to some technical error, data not saved");
             Helpers.WriteToFile(logPath, ex.ToString(), true);
-
         }
+
         return View("Create", group);
     }
 }

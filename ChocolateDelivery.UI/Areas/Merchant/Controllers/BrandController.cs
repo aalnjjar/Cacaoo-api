@@ -47,18 +47,11 @@ public class BrandController : Controller
                 {
                     if (brand.Image_File != null)
                     {
-                        var image_path_dir = "assets/images/categories/";
                         var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + brand.Image_File.FileName;
-                        var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                        if (!Directory.Exists(path))
-                        {
-                            Directory.CreateDirectory(path);
-                        }
-                        var filePath = Path.Combine(path, fileName);
-                        var stream = new FileStream(filePath, FileMode.Create);
-                        brand.Image_File.CopyToAsync(stream);
+                        
+                        var path = AmazonS3Service.UploadToS3(brand.Image_File, "Brands", fileName).Result;
 
-                        brand.Image_URL = image_path_dir + fileName;
+                        brand.Image_URL = path;
                     }
                     brand.Restaurant_Id = Convert.ToInt32(vendor_id);
                     brand.Created_By = Convert.ToInt16(vendor_id);
@@ -147,18 +140,11 @@ public class BrandController : Controller
                     {
                         if (brand.Image_File != null)
                         {
-                            var image_path_dir = "assets/images/categories/";
                             var fileName = Guid.NewGuid().ToString("N").Substring(0, 12) + "_" + brand.Image_File.FileName;
-                            var path = Path.Combine(this.iwebHostEnvironment.WebRootPath, image_path_dir);
-                            if (!Directory.Exists(path))
-                            {
-                                Directory.CreateDirectory(path);
-                            }
-                            var filePath = Path.Combine(path, fileName);
-                            var stream = new FileStream(filePath, FileMode.Create);
-                            brand.Image_File.CopyToAsync(stream);
+                        
+                            var path = AmazonS3Service.UploadToS3(brand.Image_File, "Brands", fileName).Result;
 
-                            brand.Image_URL = image_path_dir + fileName;
+                            brand.Image_URL = path;
                         }
                         brand.Brand_Id = decryptedId;
                         brand.Updated_By = Convert.ToInt16(vendor_id);
