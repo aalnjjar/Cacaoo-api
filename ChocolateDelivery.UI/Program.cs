@@ -17,8 +17,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         .UseLowerCaseNamingConvention();
 });
 
-AmazonS3Service.SetConfigs(configuration);
-
 //Below code is used to check session globally
 builder.Services.AddControllers(config => { config.Filters.Add(new CheckSession()); });
 
