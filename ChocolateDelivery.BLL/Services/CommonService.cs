@@ -1,7 +1,8 @@
 ﻿using ChocolateDelivery.DAL;
-using MySqlConnector;
 using System.Data;
 using System.Net.Mail;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace ChocolateDelivery.BLL;
 
@@ -187,15 +188,15 @@ public class CommonService : ICommonService
                 if (findDTO.Is_StoredProcedure == true)
                 {
                     var tempDatatable = new DataTable();
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(findDTO.StoredProcedure_Name, con))
+                        using (var cmd = new NpgsqlCommand(findDTO.StoredProcedure_Name, con))
                         {
                             if (findDTO.Command_Timeout != null)
                             {
                                 cmd.CommandTimeout = (int)findDTO.Command_Timeout;
                             }
-                            using (var da = new MySqlDataAdapter(cmd))
+                            using (var da = new NpgsqlDataAdapter(cmd))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -218,12 +219,12 @@ public class CommonService : ICommonService
                 }
                 else
                 {
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(sqlstmt))
+                        using (var cmd = new NpgsqlCommand(sqlstmt))
                         {
                             cmd.Connection = con;
-                            using (var sda = new MySqlDataAdapter(cmd))
+                            using (var sda = new NpgsqlDataAdapter(cmd))
                             {
                                 sda.Fill(dt);
                             }
@@ -240,34 +241,34 @@ public class CommonService : ICommonService
         return dt;
     }
 
-    public MySqlDbType GetSqlDbType(string par_type)
+    public NpgsqlDbType GetSqlDbType(string par_type)
     {
-        var sqldbType = MySqlDbType.VarChar;
+        var sqldbType = NpgsqlDbType.Varchar;
         try
         {
             if (par_type.ToLower().Equals(SP_DB_Types.Int))
             {
-                sqldbType = MySqlDbType.Int32;
+                sqldbType = NpgsqlDbType.Integer;
             }
             else if (par_type.ToLower().Equals(SP_DB_Types.SmallInt))
             {
-                sqldbType = MySqlDbType.Int16;
+                sqldbType = NpgsqlDbType.Smallint;
             }
             else if (par_type.ToLower().Equals(SP_DB_Types.BigInt))
             {
-                sqldbType = MySqlDbType.Int64;
+                sqldbType = NpgsqlDbType.Bigint;
             }
             else if (par_type.ToLower().Equals(SP_DB_Types.Decimal))
             {
-                sqldbType = MySqlDbType.Decimal;
+                sqldbType = NpgsqlDbType.Money;
             }
             else if (par_type.ToLower().Equals(SP_DB_Types.Datetime))
             {
-                sqldbType = MySqlDbType.DateTime;
+                sqldbType = NpgsqlDbType.Timestamp;
             }
             else if (par_type.ToLower().Equals(SP_DB_Types.Varchar))
             {
-                sqldbType = MySqlDbType.VarChar;
+                sqldbType = NpgsqlDbType.Varchar;
             }
         }
         catch (Exception ex)

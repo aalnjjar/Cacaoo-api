@@ -1,4 +1,7 @@
-﻿namespace ChocolateDelivery.BLL;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+
+namespace ChocolateDelivery.BLL;
 
 public static class Helpers
 {
@@ -29,5 +32,34 @@ public static class Helpers
         //declare as constant.
         var format = "dd-MMM-yyyy";
         return Convert.ToDateTime(Date).ToString(format);
+    }
+
+    public static string ConvertToPgsqlQuery(this string mySqlQuery)
+    {
+        var pattern = @"as\s+'([^']+)'";
+        var replacement = @"as ""$1""";
+
+        var resultQuery = Regex.Replace(mySqlQuery, pattern, replacement);
+        
+        var arr = resultQuery.Split(";").ToList();
+        var selectQuery = arr.Last();
+		
+        arr.Remove(selectQuery);
+	
+        var dict = new Dictionary<string, string>();
+        foreach (var element in arr)
+        {
+            var split = element.Split("=");
+            var val = split.Last();
+            var key = "@" + split.First().Split("@").Last();
+            dict.Add(key, val);
+        }
+
+        foreach (var (k,v) in dict)
+        {
+            selectQuery = selectQuery.Replace(k,v, ignoreCase : true, new CultureInfo("en"));
+        }
+
+        return selectQuery;
     }
 }

@@ -1,9 +1,9 @@
 ﻿using ChocolateDelivery.BLL;
 using ChocolateDelivery.DAL;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
 using System.Data;
 using System.Globalization;
+using Npgsql;
 
 namespace ChocolateDelivery.UI.Areas.Merchant.Controllers;
 
@@ -247,15 +247,15 @@ public class ListController : Controller
                 if (findDTO.Is_StoredProcedure == true)
                 {
 
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(findDTO.StoredProcedure_Name, con))
+                        using (var cmd = new NpgsqlCommand(findDTO.StoredProcedure_Name, con))
                         {
                             if (findDTO.Command_Timeout != null)
                             {
                                 cmd.CommandTimeout = (int)findDTO.Command_Timeout;
                             }
-                            using (var da = new MySqlDataAdapter(cmd))
+                            using (var da = new NpgsqlDataAdapter(cmd))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -278,22 +278,22 @@ public class ListController : Controller
                 }
                 else
                 {
-                    using (var con = new MySqlConnection(connectionString))
+                    using (var con = new NpgsqlConnection(connectionString))
                     {
-                        using (var cmd = new MySqlCommand(selectstmt))
+                        using (var cmd = new NpgsqlCommand(selectstmt))
                         {
                             cmd.Connection = con;
-                            using (var sda = new MySqlDataAdapter(cmd))
+                            using (var sda = new NpgsqlDataAdapter(cmd))
                             {
                                 sda.Fill(dt);
                             }
                         }
                     }
-                    /*MySqlConnection connection = new MySqlConnection(connectionString);
-                    MySqlCommand command1;
-                    MySqlDataReader dataReader1;
+                    /*NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                    NpgsqlCommand command1;
+                    NpgsqlDataReader dataReader1;
                     connection.Open();
-                    command1 = new MySqlCommand(selectstmt, connection);
+                    command1 = new NpgsqlCommand(selectstmt, connection);
                     if (findDTO.Command_Timeout != null)
                     {
                         command1.CommandTimeout = (int)findDTO.Command_Timeout;

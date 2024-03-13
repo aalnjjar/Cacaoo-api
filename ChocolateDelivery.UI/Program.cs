@@ -1,3 +1,4 @@
+using ChocolateDelivery.BLL;
 using ChocolateDelivery.DAL;
 using ChocolateDelivery.UI.CustomFilters;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 var configuration = builder.Configuration;
-var rabbitMQSection = configuration.GetSection("ConnectionStrings");
-var connection_string = rabbitMQSection["DefaultConnection"];
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connection_string, ServerVersion.AutoDetect(connection_string)));
+{
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+        .UseLowerCaseNamingConvention();
+});
+
+AmazonS3Service.SetConfigs(configuration);
 
 //Below code is used to check session globally
 builder.Services.AddControllers(config => { config.Filters.Add(new CheckSession()); });
