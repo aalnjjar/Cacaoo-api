@@ -19,11 +19,10 @@ public static class AmazonS3Service
     }
     public static async Task<string> UploadToS3(IFormFile file, string subDirectory = "", string fileName = "")
     {
-        var uniqueFileName = $"{fileName}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
         var request = new PutObjectRequest
         {
-            BucketName = $"{_bucket}{(string.IsNullOrEmpty(subDirectory) ? "" : $"/{subDirectory}")}",
-            Key = uniqueFileName,
+            BucketName = _bucket,
+            Key = fileName,
             InputStream = file.OpenReadStream(),
             ContentType = file.ContentType
         };
@@ -34,7 +33,7 @@ public static class AmazonS3Service
             throw new Exception("Upload failed");
         }
 
-        return uniqueFileName;
+        return $"{CdnUrl}{fileName}";
     }
 
     public static async Task<bool> DeleteFromS3(string subDirectory, string fileName = "")
