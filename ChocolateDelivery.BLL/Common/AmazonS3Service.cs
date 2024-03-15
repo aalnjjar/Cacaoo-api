@@ -33,7 +33,7 @@ public static class AmazonS3Service
             throw new Exception("Upload failed");
         }
 
-        return $"{CdnUrl}{fileName}";
+        return fileName;
     }
 
     public static async Task<bool> DeleteFromS3(string subDirectory, string fileName = "")
