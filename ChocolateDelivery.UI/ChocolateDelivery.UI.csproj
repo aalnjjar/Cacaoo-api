@@ -12,6 +12,7 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Remove="wwwroot\ErrorLog\13-Mar-2024.txt" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,6 +34,10 @@
 
     <ItemGroup>
       <AdditionalFiles Include="Areas\Admin\Views\LeafCategory\Create.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="ErrorLog\13-Mar-2024.txt" />
     </ItemGroup>
 
 </Project>
