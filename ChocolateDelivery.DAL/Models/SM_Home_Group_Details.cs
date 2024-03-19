@@ -15,6 +15,10 @@ public class SM_Home_Group_Details
     public bool Show { get; set; }      
     public int Sequence { get; set; }
     public string? Image_Url { get; set; } = string.Empty;
+    [NotMapped]
+    public string Image_Full_URL => !string.IsNullOrEmpty(Image_Url) 
+        ? "https://chocopedia.s3.me-central-1.amazonaws.com/" + Image_Url
+        : string.Empty;
     public int Line_No { get; set; }
     
     [NotMapped]

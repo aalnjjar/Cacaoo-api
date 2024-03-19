@@ -14,6 +14,10 @@ public class SM_Chefs
     public string? Chef_Desc_A { get; set; } = string.Empty;
     public short Type_Id { get; set; } = 1;
     public string? Image_URL { get; set; } = string.Empty;
+    [NotMapped]
+    public string Image_Full_URL => !string.IsNullOrEmpty(Image_URL) 
+        ? "https://chocopedia.s3.me-central-1.amazonaws.com/" + Image_URL
+        : string.Empty;
       
     public bool Show { get; set; }
     public int Sequence { get; set; } = 1;
