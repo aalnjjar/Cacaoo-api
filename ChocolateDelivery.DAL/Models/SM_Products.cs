@@ -17,6 +17,10 @@ public class SM_Products
     public string? Product_Desc_A { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string? Image_URL { get; set; } = string.Empty;
+    [NotMapped]
+    public string Image_Full_URL => !string.IsNullOrEmpty(Image_URL) 
+        ? "https://chocopedia.s3.me-central-1.amazonaws.com/" + Image_URL
+        : string.Empty;
     public bool Show { get; set; }
     public bool Publish { get; set; }
     public int Sequence { get; set; } = 1;

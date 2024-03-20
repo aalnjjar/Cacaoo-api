@@ -77,7 +77,7 @@
                                                 <div class="col-sm-12 col-md-4">
                                                     @if (Model != null && !string.IsNullOrEmpty(Model.Image_URL))
                                                     {
-                                                        <input type="file" id="Image_File" name="Image_File" data-default-file="/@Model.Image_URL" class="dropify" data-height="100" accept="image/*" data-allowed-file-extensions="jpg png jpeg" />
+                                                        <input type="file" id="Image_File" name="Image_File" data-default-file="/@Model.Image_Full_URL" class="dropify" data-height="100" accept="image/*" data-allowed-file-extensions="jpg png jpeg" />
                                                     }
                                                     else
                                                     {
